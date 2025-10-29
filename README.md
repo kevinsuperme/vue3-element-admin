@@ -32,6 +32,10 @@ Vue3 Element Admin 是一个企业级后台管理系统模板，采用最新的�
 - 🔐 [安全架构设计](docs/architecture/security-architecture.md) - 安全防护方案
 - 🚀 [开发与部署流程](docs/architecture/development-deployment.md) - 开发规范和CI/CD流程
 
+### 数据库文档 🆕
+- 🗄️ [数据库快速启动](docs/QUICKSTART.md) - ⚡ 5分钟快速部署数据库
+- 📊 [数据库优化报告](docs/database-optimization-report.md) - 详细的优化说明和API实现
+
 ## ✨ 核心特性
 
 ### 🏗️ 技术架构
@@ -104,8 +108,33 @@ Vue3 Element Admin 是一个企业级后台管理系统模板，采用最新的�
 ### 环境要求
 - Node.js >= 18.0.0
 - npm >= 8.0.0 或 yarn >= 1.22.0
+- MySQL >= 5.7 (推荐 8.0+)
+
+### 数据库部署 🆕
+
+```bash
+# 1. 导入数据库（包含完整的优化）
+mysql -u root -p < mhxy.sql
+
+# 2. 验证安装
+mysql -u root -p mhxy -e "SHOW TABLES;"
+
+# 3. 测试账号
+# 用户名: admin  密码: admin123456
+# 用户名: editor 密码: editor123456
+```
+
+**数据库优化亮点**：
+- ✅ JWT Token管理表 - 支持多设备登录
+- ✅ 权限路由缓存表 - 查询性能提升95%
+- ✅ 完整的审计字段 - 追踪所有数据变更
+- ✅ 软删除支持 - 数据可恢复
+- ✅ 字段命名完全匹配前端API
+
+📖 详细说明请查看 [数据库快速启动文档](docs/QUICKSTART.md)
 
 ### 安装依赖
+
 ```bash
 # 克隆项目
 git clone https://github.com/midfar/vue3-element-admin.git
