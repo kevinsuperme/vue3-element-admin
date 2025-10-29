@@ -220,6 +220,8 @@ yarn install
 ```
 
 ### 开发环境
+
+#### 前端项目启动
 ```bash
 # 启动开发服务器（连接测试环境）
 npm run dev:test
@@ -229,6 +231,28 @@ npm run dev:prod
 
 # 默认访问地址
 # http://localhost:8001
+```
+
+#### 后端项目启动
+```bash
+# 进入后端目录
+cd backend
+
+# 安装依赖
+npm install
+
+# 配置环境变量（创建 .env 文件）
+cp .env.example .env
+# 编辑 .env 文件，配置数据库连接等信息
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+
+# 启动生产服务器
+npm start
 ```
 
 ### 构建部署
