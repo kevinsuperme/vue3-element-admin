@@ -1,11 +1,14 @@
 # Vue3 Element Admin 🚀
 
-一个基于 Vue 3 + TypeScript + Element Plus + Vite 的现代化后台管理系统模板。
+一个基于 Vue 3 + TypeScript + Element Plus + Vite 的现代化后台管理系统模板，配套完整的 Node.js + Express + TypeScript + MongoDB 后端API服务。
 
 [![Vue 3](https://img.shields.io/badge/Vue-3.5.19-brightgreen.svg)](https://vuejs.org/)
 [![Element Plus](https://img.shields.io/badge/ElementPlus-2.11.5-blue.svg)](https://element-plus.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.3.7-purple.svg)](https://vitejs.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.18.0-green.svg)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.18.2-lightgrey.svg)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7.0+-brightgreen.svg)](https://www.mongodb.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)](package.json)
 
@@ -46,6 +49,20 @@ Vue3 Element Admin 是一个企业级后台管理系统模板，采用最新的�
 - **Pinia 3.0.3** - Vue官方状态管理库，轻量级且类型安全
 - **Vue Router 4.5.1** - Vue.js官方路由管理器
 
+### 🔧 后端技术栈
+- **Node.js 20.18.0** - 高性能JavaScript运行时
+- **Express 4.18.2** - 轻量级Web应用框架
+- **TypeScript 5.1.6** - 强类型JavaScript超集
+- **MongoDB 7.0+** - 文档型NoSQL数据库
+- **Mongoose 7.5.0** - MongoDB对象建模工具
+- **JWT** - JSON Web Token身份认证
+- **Winston** - 结构化日志记录
+- **Multer** - 文件上传处理
+- **bcryptjs** - 密码加密
+- **Helmet** - 安全HTTP头中间件
+- **CORS** - 跨域资源共享
+- **Express Validator** - 请求验证中间件
+
 ### 🔧 功能特性
 - **权限管理** - 基于RBAC的动态路由和权限控制
 - **组件封装** - 常用组件二次封装，开箱即用
@@ -61,6 +78,17 @@ Vue3 Element Admin 是一个企业级后台管理系统模板，采用最新的�
 - **代码规范** - 统一的代码风格和提交规范
 - **CI/CD** - 自动化构建和部署流程
 
+### 🛡️ 后端安全特性
+- **JWT认证** - 基于Token的身份验证机制
+- **密码加密** - bcryptjs高强度密码加密
+- **输入验证** - Express Validator请求参数验证
+- **SQL注入防护** - MongoDB注入防护中间件
+- **速率限制** - Express Rate Limit防暴力攻击
+- **安全头** - Helmet安全HTTP头配置
+- **CORS配置** - 精细化跨域访问控制
+- **文件上传安全** - 文件类型和大小验证
+- **错误处理** - 统一错误处理和日志记录
+
 ### 📦 主要依赖
 - **vue** (3.5.18) - Vue.js核心库
 - **element-plus** (2.11.5) - Element Plus组件库
@@ -70,6 +98,19 @@ Vue3 Element Admin 是一个企业级后台管理系统模板，采用最新的�
 - **@vueuse/core** (12.8.2) - Vue组合式工具库
 - **nprogress** (0.2.0) - 进度条组件
 - **path-to-regexp** (8.2.0) - 路径匹配工具
+
+### 📦 后端主要依赖
+- **express** (4.18.2) - Node.js Web应用框架
+- **mongoose** (7.5.0) - MongoDB对象建模工具
+- **jsonwebtoken** (9.0.2) - JWT认证库
+- **bcryptjs** (2.4.3) - 密码加密库
+- **multer** (1.4.5) - 文件上传中间件
+- **winston** (3.10.0) - 日志记录库
+- **helmet** (7.0.0) - 安全HTTP头中间件
+- **cors** (2.8.5) - 跨域资源共享中间件
+- **express-validator** (7.0.1) - 请求验证中间件
+- **express-rate-limit** (6.10.0) - 速率限制中间件
+- **uuid** (9.0.0) - UUID生成器
 
 ### 🔧 开发依赖
 - **vite** (6.3.7) - 构建工具
@@ -108,20 +149,46 @@ Vue3 Element Admin 是一个企业级后台管理系统模板，采用最新的�
 ### 环境要求
 - Node.js >= 18.0.0
 - npm >= 8.0.0 或 yarn >= 1.22.0
-- MySQL >= 5.7 (推荐 8.0+)
+- MongoDB >= 7.0.0 (后端数据库)
 
 ### 数据库部署 🆕
 
+#### 方案一：本地数据库
 ```bash
-# 1. 导入数据库（包含完整的优化）
-mysql -u root -p < mhxy.sql
+# 安装MongoDB 7.0+
+# 启动MongoDB服务
+mongod --dbpath /data/db
 
-# 2. 验证安装
-mysql -u root -p mhxy -e "SHOW TABLES;"
+# 数据库将自动创建，无需手动建表
+```
 
-# 3. 测试账号
-# 用户名: admin  密码: admin123456
-# 用户名: editor 密码: editor123456
+#### 方案二：Docker部署
+```bash
+# 启动MongoDB容器
+docker run -d --name mongodb7 \
+  -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=root123456 \
+  -p 27017:27017 \
+  mongo:7.0
+
+# 或者使用docker-compose
+```yaml
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: vue3-admin-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: root123456
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
 ```
 
 **数据库优化亮点**：
