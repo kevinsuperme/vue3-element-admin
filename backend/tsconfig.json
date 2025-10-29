@@ -15,10 +15,9 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "moduleResolution": "node10",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "jest"],
-    "ignoreDeprecations": "5.0"
+    "types": ["node", "jest"]
   },
   "include": [
     "src/**/*"
