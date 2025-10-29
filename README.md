@@ -525,6 +525,21 @@ A: Mock数据默认在开发环境启用，生产环境需要在 `vite.config.ts
 - 编写单元测试
 - 提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/)
 
+#### 前端规范
+- **组件命名**: PascalCase
+- **文件命名**: kebab-case
+- **变量命名**: camelCase
+- **常量命名**: UPPER_SNAKE_CASE
+- **CSS命名**: BEM规范
+
+#### 后端规范
+- **控制器命名**: PascalCase + Controller后缀
+- **模型命名**: PascalCase + Model后缀
+- **接口命名**: PascalCase
+- **路由命名**: kebab-case
+- **函数命名**: camelCase
+- **常量命名**: UPPER_SNAKE_CASE
+
 ### 分支策略
 - `main` - 主分支，稳定版本
 - `develop` - 开发分支，集成测试
@@ -540,6 +555,23 @@ A: Mock数据默认在开发环境启用，生产环境需要在 `vite.config.ts
 如有问题或建议，请通过以下方式联系我们：
 - 📧 邮箱: admin@midfar.com
 - 💬 提交 [Issue](https://github.com/midfar/vue3-element-admin/issues)
+
+### 常见问题
+
+#### 后端服务启动失败
+1. 检查MongoDB服务是否正常运行
+2. 确认 `.env` 文件中的数据库连接配置正确
+3. 检查端口3000是否被占用
+
+#### 前端无法连接后端API
+1. 确认后端服务已启动并运行在3000端口
+2. 检查前端 `.env` 文件中的 `VITE_API_BASE_URL` 配置
+3. 确认CORS配置允许前端域名访问
+
+#### 文件上传功能异常
+1. 检查 `uploads` 目录是否存在且有写入权限
+2. 确认文件大小未超过配置限制
+3. 检查文件类型是否在允许列表中
 
 ## 📝 API文档
 
@@ -605,16 +637,21 @@ interface ApiResponse<T> {
 ### v1.0.0 (2024-12)
 - ✨ 初始版本发布
 - 🏗️ 基于 Vue 3 + TypeScript + Element Plus + Vite 技术栈
-- 🔐 完整的权限管理系统
+- 🏗️ 配套完整的 Node.js + Express + TypeScript + MongoDB 后端API服务
+- 🔐 完整的权限管理系统（前后端分离架构）
 - 📱 响应式布局设计
 - 🌍 国际化支持
 - 🚀 性能优化和代码分割
 - 📚 完整的架构文档和使用指南
+- 🛡️ 完善的安全机制（JWT认证、输入验证、速率限制等）
+- 📊 结构化日志记录和系统监控
 
 ### 版本规划
 - **v1.1.0** - 微前端架构支持
 - **v1.2.0** - 服务端渲染(SSR)支持
 - **v1.3.0** - AI智能功能集成
+- **v1.4.0** - 后端微服务架构升级
+- **v1.5.0** - 实时通信功能（WebSocket）
 - **v2.0.0** - 移动端适配和PWA支持
 
 ---
