@@ -1,0 +1,25 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  "cSpell.words": [
+    "maxsize",
+    "maxfiles",
+    "iputils",
+    "bcryptjs",
+    "mongoosejs",
+    "jsonwebtoken"
+  ],
+
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.git": true
+  },
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/logs": true
+  }
+}
