@@ -125,14 +125,25 @@ export class DatabaseInit {
   static async healthCheck() {
     try {
       const mongoState = mongoose.connection.readyState;
-      const mongoStatus = {
+      const mongoStatus: Record<number, string> = {
         0: 'disconnected',
         1: 'connected',
         2: 'connecting',
         3: 'disconnecting'
       };
 
-      const health = {
+      const health: {
+        mongodb: {
+          status: string;
+          host: string;
+          port: number;
+          name: string;
+          stats?: {
+            userCount: number;
+            roleCount: number;
+          };
+        };
+      } = {
         mongodb: {
           status: mongoStatus[mongoState] || 'unknown',
           host: mongoose.connection.host,

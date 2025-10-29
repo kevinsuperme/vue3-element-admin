@@ -9,13 +9,14 @@
 
 **问题描述**：
 - TypeScript 7.0 弃用警告：`moduleResolution=node` 已被弃用
+- `ignoreDeprecations` 值错误：应该是 `"5.0"` 而不是 `"6.0"`
 
 **解决方案**：
 ```json
 {
   "compilerOptions": {
     "moduleResolution": "node10",  // 从 "node" 改为 "node10"
-    "ignoreDeprecations": "6.0"    // 添加此选项忽略警告
+    "ignoreDeprecations": "5.0"    // 添加此选项忽略警告（正确的值）
   }
 }
 ```
@@ -108,6 +109,57 @@ new winston.transports.File({
 
 ---
 
+### ✅ 4. TypeScript 类型定义问题（database.ts）
+
+**问题描述**：
+- `mongoStatus` 对象类型推断错误，无法用 `mongoState` 索引
+- `health.mongodb.stats` 属性未在初始类型中定义
+
+**解决方案**：
+```typescript
+// ❌ 修复前
+const mongoStatus = {
+  0: 'disconnected',
+  1: 'connected',
+  // ...
+};
+const health = {
+  mongodb: {
+    status: mongoStatus[mongoState],  // 类型错误
+    // ...
+  }
+};
+health.mongodb.stats = { /* ... */ };  // 属性不存在错误
+
+// ✅ 修复后
+const mongoStatus: Record<number, string> = {  // 显式类型注解
+  0: 'disconnected',
+  1: 'connected',
+  // ...
+};
+const health: {
+  mongodb: {
+    status: string;
+    host: string;
+    port: number;
+    name: string;
+    stats?: {  // 可选属性
+      userCount: number;
+      roleCount: number;
+    };
+  };
+} = {
+  mongodb: {
+    status: mongoStatus[mongoState] || 'unknown',
+    // ...
+  }
+};
+```
+
+**影响范围**：数据库健康检查功能
+
+---
+
 ## 验证方法
 
 ### 1. 编译检查
@@ -130,9 +182,15 @@ npm run lint
 
 ## 修复后的状态
 
-### 编译错误：0 ❌ → ✅
-### TypeScript 错误：5 ❌ → ✅
-### 警告信息：仅剩拼写检查提示（可忽略）
+### 编译错误：✅ 0个
+### TypeScript 错误：✅ 0个
+### Lint 警告：✅ 仅剩拼写检查提示（可忽略）
+
+**验证结果**：
+```bash
+$ cd backend && npx tsc --noEmit
+# ✅ 无错误输出，编译成功！
+```
 
 ---
 
