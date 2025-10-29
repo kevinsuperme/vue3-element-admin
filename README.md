@@ -391,7 +391,7 @@ vue3-element-admin/
 
 ## 🔧 配置指南
 
-### 环境配置
+### 前端环境配置
 项目支持多环境配置，通过不同的环境文件进行区分：
 
 - `.env.dev_test` - 开发测试环境
@@ -399,7 +399,7 @@ vue3-element-admin/
 - `.env.build_test` - 构建测试环境
 - `.env.build_prod` - 构建生产环境
 
-#### 关键配置项
+#### 前端关键配置项
 ```bash
 # API基础路径
 VITE_BASE_API = '/'
@@ -409,6 +409,49 @@ VITE_ENV = 'development'
 
 # Cookie配置（测试环境需要）
 VITE_COOKIE = ''
+```
+
+### 后端环境配置
+后端使用 `.env` 文件进行配置：
+
+```bash
+# 创建环境变量文件
+cp backend/.env.example backend/.env
+```
+
+#### 后端主要配置项
+```bash
+# 服务器配置
+PORT=3000
+NODE_ENV=development
+
+# 数据库配置
+MONGODB_URI=mongodb://localhost:27017/vue3_admin
+DB_NAME=vue3_admin
+
+# JWT配置
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=7d
+
+# 文件上传配置
+UPLOAD_DIR=uploads
+MAX_FILE_SIZE=10485760
+ALLOWED_FILE_TYPES=jpg,jpeg,png,gif,pdf,doc,docx
+
+# 日志配置
+LOG_LEVEL=info
+LOG_FILE=logs/app.log
+
+# 邮件配置（可选）
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_password
+
+# Redis配置（可选）
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
 ```
 
 ### Vite配置
@@ -497,6 +540,65 @@ A: Mock数据默认在开发环境启用，生产环境需要在 `vite.config.ts
 如有问题或建议，请通过以下方式联系我们：
 - 📧 邮箱: admin@midfar.com
 - 💬 提交 [Issue](https://github.com/midfar/vue3-element-admin/issues)
+
+## 📝 API文档
+
+### 接口规范
+- **基础路径**: `/api/v1`
+- **认证方式**: JWT Token
+- **数据格式**: JSON
+- **统一响应格式**:
+
+```typescript
+interface ApiResponse<T> {
+  code: number      // 状态码
+  message: string   // 响应消息
+  data: T          // 响应数据
+  timestamp: number // 时间戳
+  errors?: Array<{  // 验证错误信息（可选）
+    field: string
+    message: string
+    value?: any
+  }>
+}
+```
+
+### 后端API端点
+后端服务运行在 `http://localhost:3000`，主要API端点包括：
+
+#### 认证接口
+- `POST /api/v1/auth/register` - 用户注册
+- `POST /api/v1/auth/login` - 用户登录
+- `POST /api/v1/auth/logout` - 用户登出
+- `POST /api/v1/auth/refresh` - 刷新Token
+- `POST /api/v1/auth/change-password` - 修改密码
+
+#### 用户管理接口
+- `GET /api/v1/users` - 获取用户列表
+- `GET /api/v1/users/:id` - 获取用户信息
+- `POST /api/v1/users` - 创建用户
+- `PUT /api/v1/users/:id` - 更新用户信息
+- `DELETE /api/v1/users/:id` - 删除用户
+- `POST /api/v1/users/:id/reset-password` - 重置用户密码
+
+#### 系统管理接口
+- `GET /api/v1/system/info` - 获取系统信息
+- `GET /api/v1/system/logs` - 获取系统日志
+- `DELETE /api/v1/system/logs` - 清理系统日志
+
+#### 文件管理接口
+- `POST /api/v1/files/upload` - 文件上传
+- `GET /api/v1/files/:filename` - 文件下载
+- `DELETE /api/v1/files/:filename` - 文件删除
+
+#### 健康检查接口
+- `GET /api/v1/health` - 健康检查
+- `GET /api/v1/health/db` - 数据库连接检查
+
+### API文档和测试
+启动后端服务后，可以访问：
+- **API文档**: http://localhost:3000/api-docs
+- **健康检查**: http://localhost:3000/api/v1/health
 
 ## 📋 更新日志
 
