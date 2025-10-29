@@ -38,13 +38,9 @@ router.beforeEach(async (to, from, next) => {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const userStoreInstance = userStore();
-          const infoRes = await userStoreInstance.getInfo() as any;
-          let roles = [];
-          if (infoRes.roles) {
-            roles = infoRes.roles;
-          }
+          const infoRes = await userStoreInstance.getInfo();
+          const roles = infoRes.roles || [];
 
           // generate accessible routes map based on roles
           const permissionStoreInstance = permissionStore();
@@ -61,12 +57,12 @@ router.beforeEach(async (to, from, next) => {
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record
           next({ ...to, replace: true });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
+        } catch (error: unknown) {
           // remove token and go to login page to re-login
           const userStoreInstance = userStore();
           await userStoreInstance.resetToken();
-          ElMessage.error(error.message || 'Has Error');
+          const errorMessage = error instanceof Error ? error.message : 'Has Error';
+          ElMessage.error(errorMessage);
           NProgress.done();
           next(`/login?redirect=${to.path}`);
         }
