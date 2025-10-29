@@ -92,6 +92,11 @@ class App {
 
       logger.info('MongoDB connected successfully');
 
+      // 初始化数据库
+      const DatabaseInit = await import('./utils/database').then(m => m.default);
+      await DatabaseInit.init();
+      await DatabaseInit.createIndexes();
+
       // 数据库连接事件监听
       mongoose.connection.on('error', (error) => {
         logger.error('MongoDB connection error:', error);
