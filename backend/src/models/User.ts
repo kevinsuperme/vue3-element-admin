@@ -16,8 +16,8 @@ const userSchema = new Schema<UserDocument>({
     required: [true, '用户名不能为空'],
     unique: true,
     trim: true,
-    minlength: [3, '用户名长度不能少于3个字符'],
-    maxlength: [20, '用户名长度不能超过20个字符'],
+    minLength: [3, '用户名长度不能少于3个字符'],
+    maxLength: [20, '用户名长度不能超过20个字符'],
     match: [/^[a-zA-Z0-9_]+$/, '用户名只能包含字母、数字和下划线']
   },
   email: {
@@ -31,7 +31,7 @@ const userSchema = new Schema<UserDocument>({
   password: {
     type: String,
     required: [true, '密码不能为空'],
-    minlength: [6, '密码长度不能少于6个字符'],
+    minLength: [6, '密码长度不能少于6个字符'],
     select: false
   },
   avatar: {

@@ -4,7 +4,8 @@
       "Bash(dir:*)",
       "Bash(tree:*)",
       "Bash(touch:*)",
-      "Read(//f//**)"
+      "Read(//f//**)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
