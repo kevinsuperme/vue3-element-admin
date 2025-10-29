@@ -94,12 +94,68 @@ npm start
 
 ## API文档
 
-服务启动后，访问 `http://localhost:3000/api-docs` 查看完整的API文档。
+### 主要端点
+
+#### 认证相关
+- `POST /api/auth/login` - 用户登录
+- `POST /api/auth/register` - 用户注册
+- `POST /api/auth/logout` - 用户登出
+- `GET /api/auth/profile` - 获取当前用户信息
+- `PUT /api/auth/profile` - 更新用户信息
+- `POST /api/auth/refresh-token` - 刷新令牌
+
+#### 用户管理（需要admin权限）
+- `GET /api/auth/users` - 获取用户列表
+- `GET /api/auth/users/:id` - 获取单个用户
+- `PUT /api/auth/users/:id` - 更新用户
+- `DELETE /api/auth/users/:id` - 删除用户
+
+#### 系统管理
+- `GET /api/system/health` - 系统健康检查
+- `GET /api/system/info` - 系统信息
+- `GET /api/system/stats` - 统计信息（需要admin权限）
+
+服务启动后，访问以下地址：
+- API根目录: `http://localhost:3000/api`
+- 健康检查: `http://localhost:3000/api/system/health`
+
+### 默认账户
+
+系统会自动创建默认管理员账户：
+- 用户名: `admin`
+- 邮箱: `admin@example.com`
+- 密码: `admin123456`
+
+**重要**: 首次登录后请立即修改默认密码！
 
 ## 测试
 
 ```bash
 npm test
+npm run test:watch
+```
+
+## API使用示例
+
+### 用户登录
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123456"
+  }'
+```
+
+### 获取用户信息
+```bash
+curl -X GET http://localhost:3000/api/auth/profile \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### 健康检查
+```bash
+curl http://localhost:3000/api/system/health
 ```
 
 ## 部署

@@ -37,7 +37,7 @@ const loginLogSchema = new Schema<LoginLogDocument>({
   message: {
     type: String,
     trim: true,
-    maxlength: [500, '消息长度不能超过500个字符']
+    maxLength: [500, '消息长度不能超过500个字符']
   },
   timestamp: {
     type: Date,

@@ -11,12 +11,12 @@ const roleSchema = new Schema<RoleDocument>({
     required: [true, '角色名称不能为空'],
     unique: true,
     trim: true,
-    maxlength: [50, '角色名称长度不能超过50个字符']
+    maxLength: [50, '角色名称长度不能超过50个字符']
   },
   description: {
     type: String,
     trim: true,
-    maxlength: [200, '角色描述长度不能超过200个字符']
+    maxLength: [200, '角色描述长度不能超过200个字符']
   },
   permissions: [{
     type: String,
