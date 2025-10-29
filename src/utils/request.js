@@ -16,12 +16,16 @@ service.interceptors.request.use(
   config => {
     // do something before request is sent
 
-    const userStore = useUserStore();
-    if (userStore.token) {
-      // let each request carry token
-      // ['X-Token'] is a custom headers key
-      // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken();
+    try {
+      const userStore = useUserStore();
+      if (userStore && userStore.token) {
+        // let each request carry token
+        // ['X-Token'] is a custom headers key
+        // please modify it according to the actual situation
+        config.headers['X-Token'] = getToken();
+      }
+    } catch (error) {
+      console.warn('Failed to get user store for request interceptor:', error);
     }
     return config;
   },
@@ -63,8 +67,14 @@ service.interceptors.response.use(
           cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
-          const userStore = useUserStore();
-          userStore.resetToken();
+          try {
+            const userStore = useUserStore();
+            if (userStore && userStore.resetToken) {
+              userStore.resetToken();
+            }
+          } catch (error) {
+            console.error('Failed to reset token:', error);
+          }
           location.reload();
         });
       }

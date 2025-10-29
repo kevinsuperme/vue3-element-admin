@@ -14,6 +14,13 @@ export interface IUserState {
   roles: string[];
 }
 
+export interface IUserInfo {
+  roles: string[];
+  name: string;
+  avatar: string;
+  introduction: string;
+}
+
 const useUserStore = defineStore('user', {
   state: ():IUserState => ({
     token: getToken(),
@@ -26,7 +33,7 @@ const useUserStore = defineStore('user', {
   getters: {},
   actions: {
     // user login
-    login(userInfo):Promise<void> {
+    login(userInfo: { username: string; password: string }):Promise<void> {
       const { username, password } = userInfo;
       return new Promise((resolve, reject) => {
         apiLogin({ username: username.trim(), password: password }).then(response => {
@@ -41,7 +48,7 @@ const useUserStore = defineStore('user', {
     },
 
     // get user info
-    getInfo() {
+    getInfo(): Promise<IUserInfo> {
       return new Promise((resolve, reject) => {
         apiGetInfo(this.token).then(response => {
           const { data } = response;
@@ -79,7 +86,11 @@ const useUserStore = defineStore('user', {
 
           // reset visited views and cached views
           // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
-          useTagsViewStore().delAllViews();
+          try {
+            useTagsViewStore().delAllViews();
+          } catch (error) {
+            console.warn('Failed to clear tags view:', error);
+          }
 
           resolve();
         }).catch(error => {
@@ -96,31 +107,36 @@ const useUserStore = defineStore('user', {
     },
 
     // dynamically modify permissions
-    async changeRoles(role) {
+    async changeRoles(role: string) {
       const token = role + '-token';
 
       this.token = token;
       setToken(token);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const infoRes = await this.getInfo() as any;
-      let roles = [];
-      if (infoRes.roles) {
-        roles = infoRes.roles;
-      }
+      const infoRes = await this.getInfo();
+      const roles = infoRes.roles || [];
 
       resetRouter();
 
       // generate accessible routes map based on roles
-      const accessRoutes = await usePermissionStore().generateRoutes(roles);
-      // dynamically add accessible routes
-      // router.addRoutes(accessRoutes);
-      accessRoutes.forEach(item => {
-        router.addRoute(item);
-      });
+      try {
+        const accessRoutes = await usePermissionStore().generateRoutes(roles);
+        // dynamically add accessible routes
+        // router.addRoutes(accessRoutes);
+        accessRoutes.forEach(item => {
+          router.addRoute(item);
+        });
+      } catch (error) {
+        console.error('Failed to generate routes:', error);
+        throw error;
+      }
 
       // reset visited views and cached views
-      useTagsViewStore().delAllViews();
+      try {
+        useTagsViewStore().delAllViews();
+      } catch (error) {
+        console.warn('Failed to clear tags view:', error);
+      }
     }
   }
 });

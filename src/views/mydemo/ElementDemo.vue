@@ -8,15 +8,14 @@ import {
   Search,
   Star
 } from '@element-plus/icons-vue';
-import store from '@/store';
-console.log('store=', store);
+import { useAppStore } from '@/store/modules/app';
 
 console.log('HomeView VITE_ENV=', import.meta.env.VITE_ENV);
 console.log('HomeView VITE_BASE_API=', import.meta.env.VITE_BASE_API);
 
-const useAppStore = store.app();
+const appStore = useAppStore();
 
-console.log('appStore.device=', useAppStore.device);
+console.log('appStore.device=', appStore.device);
 </script>
 
 <template>

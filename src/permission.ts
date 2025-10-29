@@ -1,6 +1,7 @@
 import router from './router';
 import userStore from './store/modules/user';
 import permissionStore from './store/modules/permission';
+import { ElMessage } from 'element-plus';
 import NProgress from 'nprogress'; // progress bar
 import 'nprogress/nprogress.css'; // progress bar style
 import { getToken } from '@/utils/auth'; // get token from cookie
@@ -28,7 +29,8 @@ router.beforeEach(async (to, from, next) => {
       next({ path: '/' });
     } else {
       // determine whether the user has obtained his permission roles through getInfo
-      const hasRoles = userStore().roles && userStore().roles.length > 0;
+      const userStoreInstance = userStore();
+      const hasRoles = userStoreInstance.roles && userStoreInstance.roles.length > 0;
       // console.log('hasRoles=', hasRoles);
       if (hasRoles) {
         next();
@@ -37,14 +39,16 @@ router.beforeEach(async (to, from, next) => {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const infoRes = await userStore().getInfo() as any;
+          const userStoreInstance = userStore();
+          const infoRes = await userStoreInstance.getInfo() as any;
           let roles = [];
           if (infoRes.roles) {
             roles = infoRes.roles;
           }
 
           // generate accessible routes map based on roles
-          const accessRoutes = await permissionStore().generateRoutes(roles);
+          const permissionStoreInstance = permissionStore();
+          const accessRoutes = await permissionStoreInstance.generateRoutes(roles);
           // console.log('accessRoutes=', accessRoutes)
 
           // dynamically add accessible routes
@@ -60,7 +64,8 @@ router.beforeEach(async (to, from, next) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           // remove token and go to login page to re-login
-          await userStore().resetToken();
+          const userStoreInstance = userStore();
+          await userStoreInstance.resetToken();
           ElMessage.error(error.message || 'Has Error');
           NProgress.done();
           next(`/login?redirect=${to.path}`);

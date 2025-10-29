@@ -7,18 +7,27 @@ import { useUserStore } from '@/store/modules/user';
  */
 export default function checkPermission(value) {
   if (value && value instanceof Array && value.length > 0) {
-    const userStore = useUserStore();
-    const roles = userStore.roles;
-    const permissionRoles = value;
+    try {
+      const userStore = useUserStore();
+      if (!userStore || !userStore.roles) {
+        console.warn('User store not available or roles not loaded');
+        return false;
+      }
+      const roles = userStore.roles;
+      const permissionRoles = value;
 
-    const hasPermission = roles.some(role => {
-      return permissionRoles.includes(role);
-    });
+      const hasPermission = roles.some(role => {
+        return permissionRoles.includes(role);
+      });
 
-    if (!hasPermission) {
+      if (!hasPermission) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Error checking permission:', error);
       return false;
     }
-    return true;
   } else {
     console.error(`need roles! Like v-permission="['admin','editor']"`);
     return false;
