@@ -1,0 +1,321 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # 每周一早上8点运行
+    - cron: '0 8 * * 1'
+
+jobs:
+  # 代码质量分析
+  code-analysis:
+    name: Code Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整历史进行某些分析
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run ESLint with checkstyle
+        run: |
+          npm run lint -- --format=checkstyle --output-file=eslint-report.xml
+        continue-on-error: true
+
+      - name: Run backend ESLint
+        working-directory: ./backend
+        run: npm run lint -- --format=checkstyle --output-file=backend-eslint-report.xml
+        continue-on-error: true
+
+      - name: Run Prettier check
+        run: |
+          npx prettier --check "src/**/*.{js,ts,vue,json,css,scss,md}" || true
+        continue-on-error: true
+
+      - name: Check for TODO/FIXME comments
+        run: |
+          grep -r "TODO\|FIXME" src/ || echo "No TODO/FIXME found"
+          grep -r "TODO\|FIXME" backend/src/ || echo "No TODO/FIXME found in backend"
+
+      - name: Analyze code complexity
+        run: |
+          npx complexity-report --output json --format json src/ > complexity-report.json || true
+          npx complexity-report --output json --format json backend/src/ > backend-complexity-report.json || true
+        continue-on-error: true
+
+      - name: Upload code analysis results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-analysis-results
+          path: |
+            eslint-report.xml
+            backend-eslint-report.xml
+            complexity-report.json
+            backend-complexity-report.json
+          retention-days: 30
+
+  # 依赖安全扫描
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run Snyk vulnerability scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=medium --org=your-org
+        continue-on-error: true
+
+      - name: Run npm audit (frontend)
+        run: npm audit --audit-level moderate --json > npm-audit-frontend.json || true
+
+      - name: Run npm audit (backend)
+        working-directory: ./backend
+        run: npm audit --audit-level moderate --json > npm-audit-backend.json || true
+
+      - name: Check for outdated dependencies
+        run: npm outdated --json > outdated-deps.json || true
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-results
+          path: |
+            npm-audit-frontend.json
+            npm-audit-backend.json
+            outdated-deps.json
+          retention-days: 30
+
+  # 性能分析
+  performance-analysis:
+    name: Performance Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bundle size analysis
+        run: |
+          npm run build:prod
+          npx bundlesize
+
+      - name: Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.12.x
+          npm run build:prod
+          npm run preview &
+          sleep 30
+          lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            .lighthouseci/
+            bundlesize.json
+          retention-days: 30
+
+  # TypeScript类型检查
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run TypeScript check (frontend)
+        run: npm run type-check
+
+      - name: Run TypeScript check (backend)
+        working-directory: ./backend
+        run: npm run build
+
+  # 文档检查
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for missing documentation
+        run: |
+          # 检查API文件是否有文档
+          find src/api -name "*.ts" -exec grep -L "@description\|@param\|@returns" {} \; || echo "All API files have documentation"
+
+          # 检查组件是否有文档
+          find src/components -name "*.vue" -exec grep -L "@name\|@description\|@props" {} \; || echo "All component files have documentation"
+
+      - name: Validate markdown files
+        run: |
+          npm install -g markdownlint-cli
+          markdownlint "**/*.md" --config .markdownlint.json || true
+
+      - name: Check README files
+        run: |
+          if [ ! -f README.md ]; then
+            echo "Root README.md is missing"
+            exit 1
+          fi
+
+          if [ ! -f backend/README.md ]; then
+            echo "Backend README.md is missing"
+            exit 1
+          fi
+
+  # 提交信息检查
+  commit-check:
+    name: Commit Message Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: .commitlintrc.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 报告汇总
+  quality-report:
+    name: Quality Report
+    runs-on: ubuntu-latest
+    needs: [code-analysis, dependency-scan, performance-analysis, type-check, docs-check]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Generate quality report
+        run: |
+          echo "# Code Quality Report" > quality-report.md
+          echo "Generated on: $(date)" >> quality-report.md
+          echo "" >> quality-report.md
+
+          # 代码分析结果
+          if [ -f code-analysis-results/eslint-report.xml ]; then
+            echo "## ESLint Results" >> quality-report.md
+            echo "Frontend ESLint issues found" >> quality-report.md
+          fi
+
+          if [ -f code-analysis-results/backend-eslint-report.xml ]; then
+            echo "Backend ESLint issues found" >> quality-report.md
+          fi
+
+          # 安全扫描结果
+          if [ -f security-scan-results/npm-audit-frontend.json ]; then
+            echo "## Security Scan Results" >> quality-report.md
+            echo "Frontend vulnerabilities detected" >> quality-report.md
+          fi
+
+          # 性能结果
+          if [ -f performance-results/bundlesize.json ]; then
+            echo "## Performance Results" >> quality-report.md
+            echo "Bundle size analysis completed" >> quality-report.md
+          fi
+
+          echo "" >> quality-report.md
+          echo "## Summary" >> quality-report.md
+          echo "✅ All quality checks completed" >> quality-report.md
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-report
+          path: quality-report.md
+          retention-days: 30
+
+      - name: Comment PR with quality report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const fs = require('fs');
+
+              if (fs.existsSync('quality-report.md')) {
+                const report = fs.readFileSync('quality-report.md', 'utf8');
+
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: report
+                });
+              }
+            } catch (error) {
+              console.log('Could not create quality report comment:', error.message);
+            }

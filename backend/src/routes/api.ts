@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authRoutes, logRoutes, systemRoutes, fileRoutes, mainRoutes } from './index';
+import { authRoutes, logRoutes, systemRoutes, fileRoutes } from './index';
 import { errorHandler } from '../middleware/errorHandler';
 
 const router = Router();
@@ -16,14 +16,14 @@ router.get('/', (req, res) => {
       users: '/api/users',
       logs: '/api/logs',
       system: '/api/system',
-      files: '/api/files',
-    },
+      files: '/api/files'
+    }
   });
 });
 
 // 挂载各个模块的路由
 router.use('/auth', authRoutes);
-router.use('/users', authRoutes); // 用户管理路由也使用auth路由
+router.use('/users', authRoutes); // 用户管理路由使用authRoutes中的/users子路由
 router.use('/logs', logRoutes);
 router.use('/system', systemRoutes);
 router.use('/files', fileRoutes);
@@ -35,7 +35,7 @@ router.use('*', (req, res) => {
     message: 'API 接口不存在',
     path: req.originalUrl,
     method: req.method,
-    timestamp: new Date(),
+    timestamp: new Date()
   });
 });
 

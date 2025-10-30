@@ -9,5 +9,5 @@ export {
   logRoutes,
   systemRoutes,
   fileRoutes,
-  mainRoutes,
+  mainRoutes
 };

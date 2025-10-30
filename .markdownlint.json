@@ -1,0 +1,44 @@
+{
+  "default": true,
+  "MD013": {
+    "code_blocks": false,
+    "tables": false,
+    "line_length": 120
+  },
+  "MD033": {
+    "allowed_elements": [
+      "br",
+      "div",
+      "span",
+      "sub",
+      "sup",
+      "kbd",
+      "details",
+      "summary"
+    ]
+  },
+  "MD041": false,
+  "MD007": {
+    "indent": 2
+  },
+  "no-hard-tabs": false,
+  "whitespace": false,
+  "code-block-style": {
+    "style": "fenced"
+  },
+  "emphasis-style": {
+    "style": "underscore"
+  },
+  "strong-style": {
+    "style": "underscore"
+  },
+  "hr-style": {
+    "style": "---"
+  },
+  "link-style": {
+    "style": "inlined"
+  },
+  "blanks-around-headers": false,
+  "blanks-around-links": false,
+  "require-open-pre-5": false
+}

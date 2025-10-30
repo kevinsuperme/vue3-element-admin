@@ -1,0 +1,418 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+  CACHE_VERSION: 'v1'
+
+jobs:
+  # 前端构建和测试
+  frontend:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript check
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test:unit -- --run --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+      - name: Build for development
+        run: npm run build:test
+
+      - name: Build for production
+        run: npm run build:prod
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: |
+            dist/
+            !dist/**/*.map
+          retention-days: 7
+
+  # 后端构建和测试
+  backend:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Run TypeScript check
+        working-directory: ./backend
+        run: npm run build
+
+      - name: Run unit tests
+        working-directory: ./backend
+        run: npm test -- --coverage --watchAll=false
+        env:
+          NODE_ENV: test
+          MONGODB_TEST_URI: mongodb://localhost:27017/vue3-admin-test
+          JWT_SECRET: test-jwt-secret-for-ci
+          SESSION_SECRET: test-session-secret-for-ci
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage/lcov.info
+          flags: backend
+          name: backend-coverage
+
+      - name: Build backend
+        working-directory: ./backend
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist/
+          retention-days: 7
+
+  # 安全扫描
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run npm audit (frontend)
+        run: npm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Run npm audit (backend)
+        working-directory: ./backend
+        run: npm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+        continue-on-error: true
+
+  # 代码质量检查
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=vue3-element-admin
+            -Dsonar.organization=your-org
+            -Dsonar.sources=src,backend/src
+            -Dsonar.tests=tests,backend/tests
+            -Dsonar.exclusions=**/*.config.*,**/node_modules/**,**/dist/**,**/coverage/**
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,backend/coverage/lcov.info
+
+  # E2E测试
+  e2e-test:
+    name: E2E Test
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: dist/
+
+      - name: Download backend build
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist/
+
+      - name: Start services
+        run: |
+          # Start backend
+          cd backend
+          npm start &
+          sleep 10
+
+          # Start frontend dev server
+          cd ..
+          npm run preview &
+          sleep 10
+
+      - name: Wait for services
+        run: |
+          npx wait-on http://localhost:3000/api/system/health
+          npx wait-on http://localhost:4173
+
+      - name: Install Playwright
+        run: |
+          npx playwright install --with-deps
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          BASE_URL: http://localhost:4173
+          API_URL: http://localhost:3000
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+  # 部署到staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [frontend, backend, security-scan, code-quality]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+
+    environment:
+      name: staging
+      url: https://staging.vue3-element-admin.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: dist/
+
+      - name: Download backend build
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist/
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # 这里添加实际的部署脚本
+          # 例如部署到Vercel、Netlify、或其他云服务
+
+  # 部署到production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [frontend, backend, security-scan, code-quality, e2e-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    environment:
+      name: production
+      url: https://vue3-element-admin.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: dist/
+
+      - name: Download backend build
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist/
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment..."
+          # 这里添加实际的部署脚本
+          # 例如部署到AWS、Azure、或其他云服务
+
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f https://vue3-element-admin.com/api/system/health || exit 1
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🎉 Deployment to production successful!"
+          # 可以添加Slack、Discord或其他通知
+
+  # 生成合并覆盖率报告
+  coverage-report:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate coverage report
+        run: node scripts/coverage-report.js
+        continue-on-error: true
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-reports/
+          retention-days: 30
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const fs = require('fs');
+              const coveragePath = 'coverage-reports/frontend/coverage-summary.json';
+
+              if (fs.existsSync(coveragePath)) {
+                const coverage = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+                const lines = coverage.total.lines.pct;
+                const functions = coverage.total.functions.pct;
+                const branches = coverage.total.branches.pct;
+                const statements = coverage.total.statements.pct;
+
+                const comment = `## 📊 Coverage Report
+
+| Metric | Coverage |
+|--------|----------|
+| 📝 Lines | ${lines}% |
+| 🔧 Functions | ${functions}% |
+| 🌳 Branches | ${branches}% |
+| 📄 Statements | ${statements}% |
+
+${lines >= 80 && functions >= 80 && branches >= 80 && statements >= 80 ? '✅ All coverage thresholds met!' : '❌ Some coverage thresholds not met!'}
+                `;
+
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            } catch (error) {
+              console.log('Could not generate coverage comment:', error.message);
+            }

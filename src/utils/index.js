@@ -185,8 +185,9 @@ export function param2Obj(url) {
  */
 export function html2Text(val) {
   const div = document.createElement('div');
-  div.innerHTML = val;
-  return div.textContent || div.innerText;
+  // 修复XSS漏洞：使用textContent而不是innerHTML
+  div.textContent = val;
+  return div.textContent || div.innerText || '';
 }
 
 /**
@@ -272,7 +273,6 @@ export function debounce(func, wait, immediate) {
   };
 
   return function(...args) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     context = this;
     timestamp = +new Date();
     const callNow = immediate && !timeout;

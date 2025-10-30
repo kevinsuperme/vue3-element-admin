@@ -6,8 +6,11 @@ export interface ErrorLogDocument extends Omit<ErrorLog, '_id'>, Document {
 }
 
 interface ErrorLogModel extends Model<ErrorLogDocument> {
+
   getErrorStats(timeRange?: 'day' | 'week' | 'month'): Promise<any[]>;
+
   markAsResolved(errorId: string): Promise<ErrorLogDocument | null>;
+
   markMultipleAsResolved(errorIds: string[]): Promise<number>;
 }
 
@@ -59,7 +62,7 @@ const errorLogSchema = new Schema<ErrorLogDocument>({
 }, {
   timestamps: false,
   toJSON: {
-    transform: function(doc, ret) {
+    transform(doc, ret) {
       delete ret.__v;
       return ret;
     }
@@ -67,11 +70,11 @@ const errorLogSchema = new Schema<ErrorLogDocument>({
 });
 
 // 静态方法：获取错误统计
-errorLogSchema.statics.getErrorStats = async function(timeRange: 'day' | 'week' | 'month' = 'day') {
+errorLogSchema.statics.getErrorStats = async function(_timeRange: 'day' | 'week' | 'month' = 'day') {
   const now = new Date();
   let startDate: Date;
-  
-  switch (timeRange) {
+
+  switch (_timeRange) {
     case 'day':
       startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       break;
@@ -94,7 +97,7 @@ errorLogSchema.statics.getErrorStats = async function(timeRange: 'day' | 'week' 
     {
       $group: {
         _id: {
-          date: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          date: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }},
           resolved: '$resolved'
         },
         count: { $sum: 1 }
@@ -125,18 +128,18 @@ errorLogSchema.statics.getErrorStats = async function(timeRange: 'day' | 'week' 
 };
 
 // 静态方法：标记错误为已解决
-errorLogSchema.statics.markAsResolved = async function(errorId: string): Promise<ErrorLogDocument | null> {
+errorLogSchema.statics.markAsResolved = async function(_errorId: string): Promise<ErrorLogDocument | null> {
   return this.findByIdAndUpdate(
-    errorId,
+    _errorId,
     { resolved: true },
     { new: true }
   );
 };
 
 // 静态方法：批量标记错误为已解决
-errorLogSchema.statics.markMultipleAsResolved = async function(errorIds: string[]): Promise<number> {
+errorLogSchema.statics.markMultipleAsResolved = async function(_errorIds: string[]): Promise<number> {
   const result = await this.updateMany(
-    { _id: { $in: errorIds } },
+    { _id: { $in: _errorIds }},
     { resolved: true }
   );
   return result.modifiedCount;

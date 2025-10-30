@@ -6,9 +6,12 @@ export interface LoginLogDocument extends Omit<LoginLog, '_id'>, Document {
 }
 
 interface LoginLogModel extends Model<LoginLogDocument> {
-  getLoginStats(timeRange?: 'day' | 'week' | 'month'): Promise<any[]>;
-  getUserLoginHistory(userId: string, limit?: number): Promise<LoginLogDocument[]>;
-  cleanupOldLogs(daysToKeep?: number): Promise<number>;
+
+  getLoginStats(_timeRange?: 'day' | 'week' | 'month'): Promise<any[]>;
+
+  getUserLoginHistory(_userId: string, _limit?: number): Promise<LoginLogDocument[]>;
+
+  cleanupOldLogs(_daysToKeep?: number): Promise<number>;
 }
 
 const loginLogSchema = new Schema<LoginLogDocument>({
@@ -47,7 +50,7 @@ const loginLogSchema = new Schema<LoginLogDocument>({
 }, {
   timestamps: false,
   toJSON: {
-    transform: function(doc, ret) {
+    transform(doc, ret) {
       delete ret.__v;
       return ret;
     }
@@ -55,11 +58,11 @@ const loginLogSchema = new Schema<LoginLogDocument>({
 });
 
 // 静态方法：获取登录统计
-loginLogSchema.statics.getLoginStats = async function(timeRange: 'day' | 'week' | 'month' = 'day') {
+loginLogSchema.statics.getLoginStats = async function(_timeRange: 'day' | 'week' | 'month' = 'day') {
   const now = new Date();
   let startDate: Date;
-  
-  switch (timeRange) {
+
+  switch (_timeRange) {
     case 'day':
       startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       break;
@@ -82,7 +85,7 @@ loginLogSchema.statics.getLoginStats = async function(timeRange: 'day' | 'week' 
     {
       $group: {
         _id: {
-          date: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          date: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }},
           success: '$success'
         },
         count: { $sum: 1 }
@@ -113,22 +116,22 @@ loginLogSchema.statics.getLoginStats = async function(timeRange: 'day' | 'week' 
 };
 
 // 静态方法：获取用户登录历史
-loginLogSchema.statics.getUserLoginHistory = async function(userId: string, limit: number = 10) {
-  return this.find({ userId })
+loginLogSchema.statics.getUserLoginHistory = async function(_userId: string, _limit: number = 10) {
+  return this.find({ userId: _userId })
     .sort({ timestamp: -1 })
-    .limit(limit)
+    .limit(_limit)
     .populate('userId', 'username email');
 };
 
 // 静态方法：清理旧的登录日志
-loginLogSchema.statics.cleanupOldLogs = async function(daysToKeep: number = 90) {
+loginLogSchema.statics.cleanupOldLogs = async function(_daysToKeep: number = 90) {
   const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
-  
+  cutoffDate.setDate(cutoffDate.getDate() - _daysToKeep);
+
   const result = await this.deleteMany({
     timestamp: { $lt: cutoffDate }
   });
-  
+
   return result.deletedCount;
 };
 

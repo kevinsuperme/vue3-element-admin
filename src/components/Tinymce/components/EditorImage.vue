@@ -89,7 +89,6 @@ export default defineComponent({
       }
     },
     beforeUpload(file) {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const _self = this;
       const _URL = window.URL || window.webkitURL;
       const fileName = file.uid;

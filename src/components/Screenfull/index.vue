@@ -25,7 +25,6 @@ export default defineComponent({
   },
   methods: {
     click() {
-      console.log('screenfull.isEnabled=', screenfull.isEnabled, 'screenfull.isFullscreen=', screenfull.isFullscreen);
       if (!screenfull.isEnabled) {
         ElMessage({
           message: 'you browser can not work',
@@ -36,7 +35,6 @@ export default defineComponent({
       screenfull.toggle();
     },
     handleChange() {
-      console.log('screenfull.handleChange', screenfull.isFullscreen);
       this.isFullscreen = screenfull.isFullscreen;
     },
     init() {

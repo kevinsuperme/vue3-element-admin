@@ -5,7 +5,16 @@
       "Bash(tree:*)",
       "Bash(touch:*)",
       "Read(//f//**)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(sed:*)",
+      "Bash(for:*)",
+      "Bash(do echo:*)",
+      "Bash(if:*)",
+      "Bash(then:*)",
+      "Bash(else echo \"No TypeScript version found\")",
+      "Bash(fi:*)",
+      "Bash(done:*)"
     ],
     "deny": [],
     "ask": []

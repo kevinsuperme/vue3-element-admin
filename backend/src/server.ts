@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import App from './app';
+import { App } from './app';
 import logger from './utils/logger';
 
 // 加载环境变量
@@ -18,6 +18,9 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // 创建并启动应用
 const app = new App();
-app.listen();
-
-logger.info('Application started successfully');
+app.listen().then(() => {
+  logger.info('Application started successfully');
+}).catch((error) => {
+  logger.error('Failed to start application:', error);
+  process.exit(1);
+});

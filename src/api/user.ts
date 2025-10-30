@@ -1,7 +1,22 @@
 import request from '@/utils/request';
+import type {
+  LoginRequest,
+  RegisterRequest,
+  ChangePasswordRequest,
+  UpdateUserRequest,
+  RefreshTokenRequest,
+  UserInfo,
+  LoginResponse,
+  TokenResponse,
+  ApiResponse
+} from '@/types/auth';
+
+/**
+ * 用户认证相关API
+ */
 
 // 用户登录
-export function login(data: any) {
+export function login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
   return request({
     url: '/api/auth/login',
     method: 'post',
@@ -10,16 +25,16 @@ export function login(data: any) {
 }
 
 // 获取用户信息
-export function getInfo(token: string) {
+export function getInfo(token?: string): Promise<ApiResponse<UserInfo>> {
   return request({
     url: '/api/auth/profile',
     method: 'get',
-    params: { token }
+    params: token ? { token } : undefined
   });
 }
 
 // 用户登出
-export function logout() {
+export function logout(): Promise<ApiResponse<null>> {
   return request({
     url: '/api/auth/logout',
     method: 'post'
@@ -27,7 +42,7 @@ export function logout() {
 }
 
 // 用户注册
-export function register(data: any) {
+export function register(data: RegisterRequest): Promise<ApiResponse<LoginResponse>> {
   return request({
     url: '/api/auth/register',
     method: 'post',
@@ -36,7 +51,7 @@ export function register(data: any) {
 }
 
 // 刷新令牌
-export function refreshToken(data: any) {
+export function refreshToken(data: RefreshTokenRequest): Promise<ApiResponse<TokenResponse>> {
   return request({
     url: '/api/auth/refresh-token',
     method: 'post',
@@ -45,7 +60,7 @@ export function refreshToken(data: any) {
 }
 
 // 修改密码
-export function changePassword(data: any) {
+export function changePassword(data: ChangePasswordRequest): Promise<ApiResponse<null>> {
   return request({
     url: '/api/auth/change-password',
     method: 'put',
@@ -54,7 +69,7 @@ export function changePassword(data: any) {
 }
 
 // 更新用户信息
-export function updateUser(data: any) {
+export function updateUser(data: UpdateUserRequest): Promise<ApiResponse<UserInfo>> {
   return request({
     url: '/api/auth/profile',
     method: 'put',

@@ -19,4 +19,5 @@ router.get('/login-logs/user/:userId', authenticate, authorize(['admin']), Login
 router.post('/login-logs/batch-delete', authenticate, authorize(['admin']), LoginLogController.deleteLoginLogs);
 router.post('/login-logs/cleanup', authenticate, authorize(['admin']), LoginLogController.cleanupLoginLogs);
 
+export const logRoutes = router;
 export default router;

@@ -11,6 +11,7 @@ import { isString, isArray } from '@/utils/validate';
 import settings from '@/settings';
 import { nextTick } from 'vue';
 import type { App } from 'vue';
+import logger from '@/utils/logger';
 
 // you can set in settings.js
 // errorLog:'production' | ['production', 'development']
@@ -27,34 +28,61 @@ function checkNeed() {
   return false;
 }
 
+// 存储错误处理定时器ID，用于清理
+const errorTimers: Set<NodeJS.Timeout> = new Set();
+
 export function checkEnableLogs(app: App) {
   if (checkNeed()) {
     app.config.errorHandler = function(err, instance, info) {
-      // Don't ask me why I use Vue.nextTick, it just a hack.
-      // detail see https://forum.vuejs.org/t/dispatch-in-vue-config-errorhandler-has-some-problem/23500
+      // 使用更可靠的方式处理错误
       nextTick(() => {
         try {
-          // Add delay to ensure Pinia is fully initialized
-          setTimeout(() => {
+          // 使用requestAnimationFrame替代setTimeout，更高效
+          const timerId = requestAnimationFrame(() => {
             try {
               const errorLogStore = useErrorLogStore();
-              if (errorLogStore && errorLogStore.addErrorLog) {
+              if (errorLogStore && typeof errorLogStore.addErrorLog === 'function') {
                 errorLogStore.addErrorLog({
                   err,
                   instance,
                   info,
-                  url: window.location.href
+                  url: window.location.href,
+                  timestamp: new Date().toISOString()
                 });
               }
             } catch (storeError) {
-              console.error('Error logging failed:', storeError);
+              logger.error('Error logging failed:', storeError);
+            } finally {
+              errorTimers.delete(timerId as any);
             }
-          }, 0);
+          });
+          errorTimers.add(timerId as any);
         } catch (error) {
-          console.error('Error in error handler setup:', error);
+          logger.error('Error in error handler setup:', error);
         }
-        console.error(err, info);
+        logger.error(err, info);
       });
     };
+
+    // 在应用卸载时清理定时器
+    app.unmount = (() => {
+      const originalUnmount = app.unmount.bind(app);
+      return () => {
+        // 清理所有待处理的错误定时器
+        errorTimers.forEach(timerId => {
+          cancelAnimationFrame(timerId as number);
+        });
+        errorTimers.clear();
+        originalUnmount();
+      };
+    })();
   }
+}
+
+// 导出清理函数，供测试或特殊情况使用
+export function clearErrorTimers() {
+  errorTimers.forEach(timerId => {
+    cancelAnimationFrame(timerId as number);
+  });
+  errorTimers.clear();
 }

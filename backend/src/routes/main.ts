@@ -15,8 +15,8 @@ router.get('/', (req, res) => {
       users: '/api/users',
       logs: '/api/logs',
       system: '/api/system',
-      files: '/api/files',
-    },
+      files: '/api/files'
+    }
   });
 });
 
@@ -27,7 +27,7 @@ router.use('*', (req, res) => {
     message: 'API 接口不存在',
     path: req.originalUrl,
     method: req.method,
-    timestamp: new Date(),
+    timestamp: new Date()
   });
 });
 

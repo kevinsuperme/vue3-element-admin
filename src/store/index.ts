@@ -22,7 +22,7 @@ interface ImportedModule {
 }
 
 // 定义store函数类型（defineStore返回的函数）
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 type StoreFunction = () => any; // Pinia的defineStore返回的store函数
 
 const modules:Record<string, StoreFunction> = {};

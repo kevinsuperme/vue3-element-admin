@@ -2,9 +2,11 @@ import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import config from '../config';
 import { User } from '../types';
+import logger from '../utils/logger';
 
 export interface UserDocument extends Omit<User, '_id'>, Document {
   _id: string;
+
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateAvatar(): string;
   updateLastLogin(): Promise<void>;
@@ -36,7 +38,7 @@ const userSchema = new Schema<UserDocument>({
   },
   avatar: {
     type: String,
-    default: function(this: UserDocument) {
+    default(this: UserDocument) {
       return this.generateAvatar();
     }
   },
@@ -54,7 +56,7 @@ const userSchema = new Schema<UserDocument>({
 }, {
   timestamps: true,
   toJSON: {
-    transform: function(doc, ret) {
+    transform(_doc, ret) {
       delete ret.password;
       delete ret.__v;
       return ret;
@@ -69,15 +71,35 @@ userSchema.methods.generateAvatar = function(): string {
   return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
 };
 
-// 密码加密
+// 密码加密和验证
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
+    // 密码强度验证
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (!passwordRegex.test(this.password)) {
+      logger.warn('Password validation failed for user:', {
+        username: this.username,
+        reason: 'Password does not meet complexity requirements'
+      });
+      return next(new Error('密码必须包含大小写字母、数字和特殊字符'));
+    }
+
     const salt = await bcrypt.genSalt(config.security.bcryptSaltRounds);
     this.password = await bcrypt.hash(this.password, salt);
+
+    logger.info('Password hashed successfully for user:', {
+      username: this.username,
+      saltRounds: config.security.bcryptSaltRounds
+    });
+
     next();
   } catch (error) {
+    logger.error('Password hashing failed:', {
+      username: this.username,
+      error
+    });
     next(error as Error);
   }
 });
@@ -85,8 +107,21 @@ userSchema.pre('save', async function(next) {
 // 密码比较
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+
+    if (!isMatch) {
+      logger.warn('Password comparison failed:', {
+        username: this.username,
+        reason: 'Password does not match'
+      });
+    }
+
+    return isMatch;
   } catch (error) {
+    logger.error('Password comparison error:', {
+      username: this.username,
+      error
+    });
     return false;
   }
 };

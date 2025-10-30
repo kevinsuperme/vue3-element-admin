@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { User, Role } from '../models';
-import config from '../config';
 import logger from './logger';
+import { performanceMonitor } from './performance';
 
 export class DatabaseInit {
   // 初始化数据库
@@ -72,7 +72,7 @@ export class DatabaseInit {
     try {
       const adminUsername = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
       const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@example.com';
-      const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin123456';
+      const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin123!@#';
 
       const existingAdmin = await User.findOne({ username: adminUsername });
       if (!existingAdmin) {
@@ -108,13 +108,36 @@ export class DatabaseInit {
   // 创建索引
   static async createIndexes() {
     try {
+      const startTime = Date.now();
+
       // 用户集合索引
       await User.createIndexes();
 
       // 角色集合索引
       await Role.createIndexes();
 
-      logger.info('Database indexes created successfully');
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+
+      logger.info(`Database indexes created successfully in ${duration}ms`);
+
+      // 记录性能指标
+      const memoryUsage = performanceMonitor.getCurrentMemoryUsage();
+      performanceMonitor.recordMetric({
+        requestId: `index_creation_${startTime}`,
+        method: 'DB_INDEX',
+        url: 'database/indexes',
+        statusCode: 200,
+        responseTime: duration,
+        memoryUsage: {
+          heapUsed: memoryUsage.heapUsed,
+          heapTotal: memoryUsage.heapTotal,
+          rss: memoryUsage.rss,
+          external: memoryUsage.external
+        },
+        cpuUsage: 0,
+        timestamp: new Date()
+      });
     } catch (error) {
       logger.error('Failed to create database indexes:', error);
       throw error;

@@ -15,4 +15,5 @@ router.get('/system/config', authenticate, authorize(['admin']), SystemControlle
 router.get('/system/stats', authenticate, authorize(['admin']), SystemController.getStatistics);
 router.post('/system/restart', authenticate, authorize(['admin']), SystemController.restartApplication);
 
+export const systemRoutes = router;
 export default router;

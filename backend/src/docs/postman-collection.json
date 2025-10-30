@@ -1,0 +1,646 @@
+{
+  "info": {
+    "name": "Vue3 Element Admin API",
+    "description": "Vue3 Element Admin后台管理系统API集合",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "认证相关",
+      "item": [
+        {
+          "name": "用户注册",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"测试\",\n  \"lastName\": \"用户\",\n  \"phone\": \"13800138000\",\n  \"department\": \"技术部\",\n  \"position\": \"开发工程师\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"注册成功\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户登录",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123456\",\n  \"rememberMe\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"登录成功\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    ",
+                  "    // 保存token",
+                  "    pm.environment.set(\"accessToken\", jsonData.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refreshToken\", jsonData.data.tokens.refreshToken);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "刷新令牌",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "用户登出",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "忘记密码",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "重置密码",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"reset-token-from-email\",\n  \"password\": \"newPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "用户管理",
+      "item": [
+        {
+          "name": "获取用户列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=10&search=admin&status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "admin"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "创建用户",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"新\",\n  \"lastName\": \"用户\",\n  \"roles\": [\"507f1f77bcf86cd799439012\"],\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "获取用户信息",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/507f1f77bcf86cd799439011",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "507f1f77bcf86cd799439011"]
+            }
+          }
+        },
+        {
+          "name": "更新用户信息",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"更新\",\n  \"lastName\": \"用户\",\n  \"email\": \"updated@example.com\",\n  \"phone\": \"13900139000\",\n  \"department\": \"更新部门\",\n  \"position\": \"更新职位\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/507f1f77bcf86cd799439011",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "507f1f77bcf86cd799439011"]
+            }
+          }
+        },
+        {
+          "name": "删除用户",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/507f1f77bcf86cd799439011",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "507f1f77bcf86cd799439011"]
+            }
+          }
+        },
+        {
+          "name": "更新用户状态",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/507f1f77bcf86cd799439011/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "507f1f77bcf86cd799439011", "status"]
+            }
+          }
+        },
+        {
+          "name": "获取当前用户信息",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "更新当前用户信息",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"当前\",\n  \"lastName\": \"用户\",\n  \"email\": \"current@example.com\",\n  \"phone\": \"13700137000\",\n  \"department\": \"当前部门\",\n  \"position\": \"当前职位\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "修改密码",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"oldPassword123\",\n  \"newPassword\": \"newPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/profile/password",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile", "password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "角色管理",
+      "item": [
+        {
+          "name": "获取角色列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            }
+          }
+        },
+        {
+          "name": "创建角色",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"编辑\",\n  \"code\": \"editor\",\n  \"description\": \"内容编辑人员\",\n  \"permissions\": [\"article.read\", \"article.create\", \"article.update\"],\n  \"menuIds\": [\"articles\", \"profile\"],\n  \"status\": \"active\",\n  \"sort\": 4\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            }
+          }
+        },
+        {
+          "name": "获取角色信息",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/507f1f77bcf86cd799439012",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "507f1f77bcf86cd799439012"]
+            }
+          }
+        },
+        {
+          "name": "更新角色信息",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"更新编辑\",\n  \"description\": \"更新后的内容编辑人员\",\n  \"permissions\": [\"article.read\", \"article.create\", \"article.update\", \"article.delete\"],\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/507f1f77bcf86cd799439012",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "507f1f77bcf86cd799439012"]
+            }
+          }
+        },
+        {
+          "name": "删除角色",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/507f1f77bcf86cd799439012",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "507f1f77bcf86cd799439012"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "文章管理",
+      "item": [
+        {
+          "name": "获取文章列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articles?page=1&limit=10&search=Vue3&status=published&category=技术",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "Vue3"
+                },
+                {
+                  "key": "status",
+                  "value": "published"
+                },
+                {
+                  "key": "category",
+                  "value": "技术"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "创建文章",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Vue3新特性介绍\",\n  \"content\": \"# Vue3新特性\\n\\nVue3带来了许多新特性...\",\n  \"excerpt\": \"Vue3的新特性概览\",\n  \"status\": \"published\",\n  \"tags\": [\"vue3\", \"javascript\", \"frontend\"],\n  \"category\": \"技术文章\",\n  \"coverImage\": \"https://example.com/image.jpg\",\n  \"isFeatured\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"]
+            }
+          }
+        },
+        {
+          "name": "获取文章信息",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articles/507f1f77bcf86cd799439013",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "507f1f77bcf86cd799439013"]
+            }
+          }
+        },
+        {
+          "name": "更新文章信息",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"更新后的Vue3新特性介绍\",\n  \"content\": \"# 更新后的Vue3新特性\\n\\nVue3带来了许多新特性...\",\n  \"excerpt\": \"更新后的Vue3新特性概览\",\n  \"status\": \"published\",\n  \"tags\": [\"vue3\", \"javascript\", \"frontend\", \"update\"],\n  \"category\": \"技术文章\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles/507f1f77bcf86cd799439013",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "507f1f77bcf86cd799439013"]
+            }
+          }
+        },
+        {
+          "name": "删除文章",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articles/507f1f77bcf86cd799439013",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "507f1f77bcf86cd799439013"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

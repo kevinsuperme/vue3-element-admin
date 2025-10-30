@@ -1,0 +1,145 @@
+name: 测试套件
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    name: Node.js ${{ matrix.node-version }}
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置 Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 代码风格检查
+      run: npm run lint
+
+    - name: 运行单元测试
+      run: npm run test:unit:coverage
+
+    - name: 运行集成测试
+      run: npx vitest run tests/integration
+
+    - name: 上传覆盖率报告到 Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./tests/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: 构建项目
+      run: npm run build:prod
+
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-files
+        path: dist/
+
+  # 安全扫描
+  security:
+    runs-on: ubuntu-latest
+    name: 安全扫描
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 运行安全审计
+      run: npm audit --audit-level=high
+
+    - name: 运行 Snyk 安全扫描
+      uses: snyk/actions/node@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  # 性能测试
+  performance:
+    runs-on: ubuntu-latest
+    name: 性能测试
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 构建项目
+      run: npm run build:prod
+
+    - name: 运行 Lighthouse CI
+      run: |
+        npm install -g @lhci/cli@0.12.x
+        lhci autorun
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  # 可访问性测试
+  accessibility:
+    runs-on: ubuntu-latest
+    name: 可访问性测试
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 构建项目
+      run: npm run build:prod
+
+    - name: 运行可访问性测试
+      run: |
+        npm install -g pa11y-ci
+        npm run preview &
+        sleep 10
+        pa11y-ci --sitemap http://localhost:4173/sitemap.xml --reporter json > accessibility-report.json
+
+    - name: 上传可访问性报告
+      uses: actions/upload-artifact@v3
+      with:
+        name: accessibility-report
+        path: accessibility-report.json

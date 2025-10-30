@@ -90,7 +90,7 @@ export default defineComponent({
   },
   mounted() {
     const element = document.getElementById(this.id);
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+
     const vm = this;
     this.dropzone = new Dropzone(element, {
       clickable: this.clickable,
@@ -139,7 +139,7 @@ export default defineComponent({
         // })
         done();
       },
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       sending: (file, xhr, formData) => {
         // formData.append('token', file.token);
         // formData.append('key', file.key);

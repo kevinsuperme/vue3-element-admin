@@ -8,14 +8,14 @@ import vueEslintParser from 'vue-eslint-parser';
 
 export default [
   // 忽略文件配置
-  { ignores: ['node_modules/**', 'dist/**', '.vscode/*'] },
+  { ignores: ['node_modules/**', 'dist/**', '.vscode/*', 'backend/dist/**'] },
 
   // 推荐的ESLint配置
   js.configs.recommended,
   // Vue插件的基础配置
   ...eslintPluginVue.configs['flat/essential'],
-  // TypeScript插件的推荐配置
-  ...eslintPluginTypeScript.configs['flat/recommended'],
+  // TypeScript插件的推荐配置 - 修复配置方式
+  eslintPluginTypeScript.configs['flat/recommended'][0],
   // 基础配置
   {
     'languageOptions': {
@@ -234,6 +234,28 @@ export default [
         objectsInObjects: false
       }],
       'array-bracket-spacing': ['error', 'never']
+    }
+  },
+  // Test files configuration (Vitest)
+  {
+    files: ['tests/**/*.ts', 'tests/**/*.vue', '**/*.test.ts', '**/*.spec.ts'],
+    languageOptions: {
+      globals: {
+        vi: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        test: 'readonly'
+      }
+    },
+    rules: {
+      'no-console': 'off',
+      'no-undef': 'off', // TypeScript handles this
+      '@typescript-eslint/no-explicit-any': 'off'
     }
   }
 ];

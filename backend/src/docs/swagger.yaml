@@ -1,0 +1,1791 @@
+openapi: 3.0.3
+info:
+  title: Vue3 Element Admin API
+  description: 基于Vue3和Element Plus的后台管理系统API文档
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: 开发环境
+  - url: https://api.example.com
+    description: 生产环境
+
+security:
+  - BearerAuth: []
+  - XTokenAuth: []
+
+paths:
+  # 认证相关
+  /auth/register:
+    post:
+      tags:
+        - 认证
+      summary: 用户注册
+      description: 创建新用户账户
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 用户名或邮箱已存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - 认证
+      summary: 用户登录
+      description: 用户身份验证
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 用户名或密码错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '423':
+          description: 账户被锁定
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - 认证
+      summary: 用户登出
+      description: 用户退出登录
+      operationId: logoutUser
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      responses:
+        '200':
+          description: 登出成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - 认证
+      summary: 刷新访问令牌
+      description: 使用刷新令牌获取新的访问令牌
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: 刷新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: 刷新令牌无效或过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - 认证
+      summary: 忘记密码
+      description: 发送密码重置邮件
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: 重置邮件已发送
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/reset-password:
+    post:
+      tags:
+        - 认证
+      summary: 重置密码
+      description: 使用重置令牌设置新密码
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: 密码重置成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # 用户管理
+  /users:
+    get:
+      tags:
+        - 用户管理
+      summary: 获取用户列表
+      description: 分页获取用户列表，支持搜索和筛选
+      operationId: getUsers
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: 用户列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - 用户管理
+      summary: 创建用户
+      description: 创建新用户
+      operationId: createUser
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: 用户创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}:
+    get:
+      tags:
+        - 用户管理
+      summary: 获取用户信息
+      description: 根据ID获取用户详细信息
+      operationId: getUserById
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: 用户信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - 用户管理
+      summary: 更新用户信息
+      description: 更新用户基本信息
+      operationId: updateUser
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: 用户信息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - 用户管理
+      summary: 删除用户
+      description: 删除指定用户
+      operationId: deleteUser
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: 用户删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}/status:
+    patch:
+      tags:
+        - 用户管理
+      summary: 更新用户状态
+      description: 启用或禁用用户账户
+      operationId: updateUserStatus
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive:
+                  type: boolean
+                  description: 用户状态
+              required:
+                - isActive
+      responses:
+        '200':
+          description: 用户状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/profile:
+    get:
+      tags:
+        - 用户管理
+      summary: 获取当前用户信息
+      description: 获取当前登录用户的详细信息
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      responses:
+        '200':
+          description: 用户信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - 用户管理
+      summary: 更新当前用户信息
+      description: 更新当前登录用户的基本信息
+      operationId: updateCurrentUser
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: 用户信息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/profile/password:
+    put:
+      tags:
+        - 用户管理
+      summary: 修改密码
+      description: 修改当前用户的密码
+      operationId: changePassword
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: 密码修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # 角色管理
+  /roles:
+    get:
+      tags:
+        - 角色管理
+      summary: 获取角色列表
+      description: 获取所有角色信息
+      operationId: getRoles
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      responses:
+        '200':
+          description: 角色列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleListResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - 角色管理
+      summary: 创建角色
+      description: 创建新角色
+      operationId: createRole
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleRequest'
+      responses:
+        '201':
+          description: 角色创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /roles/{id}:
+    get:
+      tags:
+        - 角色管理
+      summary: 获取角色信息
+      description: 根据ID获取角色详细信息
+      operationId: getRoleById
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/roleId'
+      responses:
+        '200':
+          description: 角色信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 角色不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - 角色管理
+      summary: 更新角色信息
+      description: 更新角色基本信息
+      operationId: updateRole
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/roleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+      responses:
+        '200':
+          description: 角色信息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 角色不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - 角色管理
+      summary: 删除角色
+      description: 删除指定角色
+      operationId: deleteRole
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/roleId'
+      responses:
+        '200':
+          description: 角色删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 角色不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # 文章管理
+  /articles:
+    get:
+      tags:
+        - 文章管理
+      summary: 获取文章列表
+      description: 分页获取文章列表，支持搜索和筛选
+      operationId: getArticles
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: 文章列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleListResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - 文章管理
+      summary: 创建文章
+      description: 创建新文章
+      operationId: createArticle
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateArticleRequest'
+      responses:
+        '201':
+          description: 文章创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /articles/{id}:
+    get:
+      tags:
+        - 文章管理
+      summary: 获取文章信息
+      description: 根据ID获取文章详细信息
+      operationId: getArticleById
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/articleId'
+      responses:
+        '200':
+          description: 文章信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 文章不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - 文章管理
+      summary: 更新文章信息
+      description: 更新文章基本信息
+      operationId: updateArticle
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/articleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateArticleRequest'
+      responses:
+        '200':
+          description: 文章信息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleResponse'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 文章不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - 文章管理
+      summary: 删除文章
+      description: 删除指定文章
+      operationId: deleteArticle
+      security:
+        - BearerAuth: []
+        - XTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/articleId'
+      responses:
+        '200':
+          description: 文章删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 文章不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT令牌认证，格式：Bearer <token>
+    XTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Token
+      description: X-Token头认证，格式：X-Token: <token>
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: 页码（从1开始）
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    
+    limit:
+      name: limit
+      in: query
+      description: 每页数量
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    
+    search:
+      name: search
+      in: query
+      description: 搜索关键词
+      required: false
+      schema:
+        type: string
+    
+    status:
+      name: status
+      in: query
+      description: 状态筛选
+      required: false
+      schema:
+        type: string
+        enum: [active, inactive, draft, published, archived]
+    
+    category:
+      name: category
+      in: query
+      description: 分类筛选
+      required: false
+      schema:
+        type: string
+    
+    sort:
+      name: sort
+      in: query
+      description: 排序字段（格式：field:asc|desc）
+      required: false
+      schema:
+        type: string
+        example: createdAt:desc
+    
+    userId:
+      name: id
+      in: path
+      description: 用户ID
+      required: true
+      schema:
+        type: string
+        pattern: '^[0-9a-fA-F]{24}$'
+    
+    roleId:
+      name: id
+      in: path
+      description: 角色ID
+      required: true
+      schema:
+        type: string
+        pattern: '^[0-9a-fA-F]{24}$'
+    
+    articleId:
+      name: id
+      in: path
+      description: 文章ID
+      required: true
+      schema:
+        type: string
+        pattern: '^[0-9a-fA-F]{24}$'
+
+  schemas:
+    # 认证相关
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: '^[a-zA-Z0-9_-]+$'
+          description: 用户名
+        email:
+          type: string
+          format: email
+          description: 邮箱地址
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: 密码
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 名字
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 姓氏
+        phone:
+          type: string
+          maxLength: 20
+          description: 手机号码
+        department:
+          type: string
+          maxLength: 100
+          description: 部门
+        position:
+          type: string
+          maxLength: 100
+          description: 职位
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: 用户名或邮箱
+        password:
+          type: string
+          description: 密码
+        rememberMe:
+          type: boolean
+          default: false
+          description: 记住登录状态
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 登录成功
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/UserInfo'
+            tokens:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  description: 访问令牌
+                refreshToken:
+                  type: string
+                  description: 刷新令牌
+                expiresIn:
+                  type: integer
+                  description: 令牌过期时间（秒）
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: 刷新令牌
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: 注册邮箱地址
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - password
+      properties:
+        token:
+          type: string
+          description: 密码重置令牌
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: 新密码
+
+    # 用户相关
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 用户ID
+        username:
+          type: string
+          description: 用户名
+        email:
+          type: string
+          format: email
+          description: 邮箱地址
+        firstName:
+          type: string
+          description: 名字
+        lastName:
+          type: string
+          description: 姓氏
+        fullName:
+          type: string
+          description: 全名
+        avatar:
+          type: string
+          description: 头像URL
+        phone:
+          type: string
+          description: 手机号码
+        department:
+          type: string
+          description: 部门
+        position:
+          type: string
+          description: 职位
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleInfo'
+        permissions:
+          type: array
+          items:
+            type: string
+          description: 用户权限列表
+        isActive:
+          type: boolean
+          description: 账户状态
+        isEmailVerified:
+          type: boolean
+          description: 邮箱验证状态
+        lastLoginAt:
+          type: string
+          format: date-time
+          description: 最后登录时间
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    UserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 操作成功
+        data:
+          $ref: '#/components/schemas/UserInfo'
+
+    UserListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 获取成功
+        data:
+          type: object
+          properties:
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserInfo'
+            pagination:
+              $ref: '#/components/schemas/PaginationInfo'
+
+    CreateUserRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          description: 用户名
+        email:
+          type: string
+          format: email
+          description: 邮箱地址
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: 密码
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 名字
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 姓氏
+        phone:
+          type: string
+          maxLength: 20
+          description: 手机号码
+        department:
+          type: string
+          maxLength: 100
+          description: 部门
+        position:
+          type: string
+          maxLength: 100
+          description: 职位
+        roles:
+          type: array
+          items:
+            type: string
+          description: 角色ID列表
+        isActive:
+          type: boolean
+          default: true
+          description: 账户状态
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 名字
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 姓氏
+        phone:
+          type: string
+          maxLength: 20
+          description: 手机号码
+        department:
+          type: string
+          maxLength: 100
+          description: 部门
+        position:
+          type: string
+          maxLength: 100
+          description: 职位
+        roles:
+          type: array
+          items:
+            type: string
+          description: 角色ID列表
+        avatar:
+          type: string
+          description: 头像URL
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 名字
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 姓氏
+        phone:
+          type: string
+          maxLength: 20
+          description: 手机号码
+        department:
+          type: string
+          maxLength: 100
+          description: 部门
+        position:
+          type: string
+          maxLength: 100
+          description: 职位
+        avatar:
+          type: string
+          description: 头像URL
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          description: 当前密码
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: 新密码
+
+    # 角色相关
+    RoleInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 角色ID
+        name:
+          type: string
+          description: 角色名称
+        code:
+          type: string
+          description: 角色代码
+        description:
+          type: string
+          description: 角色描述
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionInfo'
+        menuIds:
+          type: array
+          items:
+            type: string
+          description: 菜单ID列表
+        status:
+          type: string
+          enum: [active, inactive]
+          description: 状态
+        sort:
+          type: integer
+          description: 排序
+        isDefault:
+          type: boolean
+          description: 是否默认角色
+        isSystem:
+          type: boolean
+          description: 是否系统角色
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    RoleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 操作成功
+        data:
+          $ref: '#/components/schemas/RoleInfo'
+
+    RoleListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 获取成功
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleInfo'
+
+    CreateRoleRequest:
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 角色名称
+        code:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_-]+$'
+          description: 角色代码
+        description:
+          type: string
+          maxLength: 200
+          description: 角色描述
+        permissions:
+          type: array
+          items:
+            type: string
+          description: 权限ID列表
+        menuIds:
+          type: array
+          items:
+            type: string
+          description: 菜单ID列表
+        status:
+          type: string
+          enum: [active, inactive]
+          default: active
+          description: 状态
+        sort:
+          type: integer
+          description: 排序
+
+    UpdateRoleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 角色名称
+        description:
+          type: string
+          maxLength: 200
+          description: 角色描述
+        permissions:
+          type: array
+          items:
+            type: string
+          description: 权限ID列表
+        menuIds:
+          type: array
+          items:
+            type: string
+          description: 菜单ID列表
+        status:
+          type: string
+          enum: [active, inactive]
+          description: 状态
+        sort:
+          type: integer
+          description: 排序
+
+    # 权限相关
+    PermissionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 权限ID
+        name:
+          type: string
+          description: 权限名称
+        description:
+          type: string
+          description: 权限描述
+        module:
+          type: string
+          description: 所属模块
+        action:
+          type: string
+          description: 操作类型
+        status:
+          type: string
+          enum: [active, inactive]
+          description: 状态
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    # 文章相关
+    ArticleInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 文章ID
+        title:
+          type: string
+          description: 标题
+        content:
+          type: string
+          description: 内容
+        excerpt:
+          type: string
+          description: 摘要
+        author:
+          $ref: '#/components/schemas/UserInfo'
+        status:
+          type: string
+          enum: [draft, published, archived]
+          description: 状态
+        tags:
+          type: array
+          items:
+            type: string
+          description: 标签
+        category:
+          type: string
+          description: 分类
+        coverImage:
+          type: string
+          description: 封面图片URL
+        views:
+          type: integer
+          description: 浏览次数
+        likes:
+          type: integer
+          description: 点赞次数
+        isFeatured:
+          type: boolean
+          description: 是否推荐
+        slug:
+          type: string
+          description: URL别名
+        publishedAt:
+          type: string
+          format: date-time
+          description: 发布时间
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    ArticleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 操作成功
+        data:
+          $ref: '#/components/schemas/ArticleInfo'
+
+    ArticleListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 获取成功
+        data:
+          type: object
+          properties:
+            articles:
+              type: array
+              items:
+                $ref: '#/components/schemas/ArticleInfo'
+            pagination:
+              $ref: '#/components/schemas/PaginationInfo'
+
+    CreateArticleRequest:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 标题
+        content:
+          type: string
+          minLength: 1
+          description: 内容
+        excerpt:
+          type: string
+          maxLength: 500
+          description: 摘要
+        status:
+          type: string
+          enum: [draft, published, archived]
+          default: draft
+          description: 状态
+        tags:
+          type: array
+          items:
+            type: string
+          description: 标签
+        category:
+          type: string
+          maxLength: 50
+          description: 分类
+        coverImage:
+          type: string
+          description: 封面图片URL
+        isFeatured:
+          type: boolean
+          default: false
+          description: 是否推荐
+
+    UpdateArticleRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 标题
+        content:
+          type: string
+          minLength: 1
+          description: 内容
+        excerpt:
+          type: string
+          maxLength: 500
+          description: 摘要
+        status:
+          type: string
+          enum: [draft, published, archived]
+          description: 状态
+        tags:
+          type: array
+          items:
+            type: string
+          description: 标签
+        category:
+          type: string
+          maxLength: 50
+          description: 分类
+        coverImage:
+          type: string
+          description: 封面图片URL
+        isFeatured:
+          type: boolean
+          description: 是否推荐
+
+    # 通用响应
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: 操作成功
+        data:
+          type: object
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: 操作失败
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: 错误代码
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: 错误字段
+                  message:
+                    type: string
+                    description: 错误信息
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: 当前页码
+        limit:
+          type: integer
+          description: 每页数量
+        total:
+          type: integer
+          description: 总记录数
+        pages:
+          type: integer
+          description: 总页数
+        hasNext:
+          type: boolean
+          description: 是否有下一页
+        hasPrev:
+          type: boolean
+          description: 是否有上一页
+tags:
+  - name: 认证
+    description: 用户认证相关接口
+  - name: 用户管理
+    description: 用户管理相关接口
+  - name: 角色管理
+    description: 角色管理相关接口
+  - name: 文章管理
+    description: 文章管理相关接口

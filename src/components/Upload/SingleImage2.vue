@@ -59,7 +59,6 @@ export default defineComponent({
       this.emitInput(this.tempUrl);
     },
     beforeUpload() {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const _self = this;
       return new Promise((resolve, reject) => {
         getToken().then(response => {

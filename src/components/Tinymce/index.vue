@@ -117,7 +117,6 @@ export default defineComponent({
       });
     },
     initTinymce() {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const that = this;
       window.tinymce.init({
         selector: `#${this.tinymceId}`,
@@ -209,7 +208,6 @@ export default defineComponent({
       window.tinymce.get(this.tinymceId).getContent();
     },
     imageSuccessCBK(arr) {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const that = this;
       arr.forEach(v => {
         window.tinymce.get(that.tinymceId).insertContent(`<img class="wscnph" src="${v.url}" >`);

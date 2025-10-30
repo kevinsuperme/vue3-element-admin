@@ -43,38 +43,64 @@ export default defineComponent({
     return {
       visible: false,
       interval: null,
-      isMoving: false
+      isMoving: false,
+      scrollTimer: null,
+      animationId: null
     };
   },
   mounted() {
-    window.addEventListener('scroll', this.handleScroll);
+    window.addEventListener('scroll', this.handleScroll, { passive: true });
   },
   beforeUnmount() {
     window.removeEventListener('scroll', this.handleScroll);
     if (this.interval) {
       clearInterval(this.interval);
     }
+    if (this.scrollTimer) {
+      cancelAnimationFrame(this.scrollTimer);
+    }
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
   },
   methods: {
     handleScroll() {
-      this.visible = window.pageYOffset > this.visibilityHeight;
+      // 使用防抖优化滚动事件处理
+      if (this.scrollTimer) {
+        cancelAnimationFrame(this.scrollTimer);
+      }
+      this.scrollTimer = requestAnimationFrame(() => {
+        this.visible = window.pageYOffset > this.visibilityHeight;
+      });
     },
     backToTop() {
       if (this.isMoving) return;
+
+      // 使用更高效的requestAnimationFrame替代setInterval
       const start = window.pageYOffset;
-      let i = 0;
+      const duration = 500; // 动画持续时间
+      const startTime = performance.now();
+
       this.isMoving = true;
-      this.interval = setInterval(() => {
-        const next = Math.floor(this.easeInOutQuad(10 * i, start, -start, 500));
-        if (next <= this.backPosition) {
+
+      const animateScroll = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // 使用缓动函数
+        const easeProgress = this.easeInOutQuad(progress * duration, start, -start, duration);
+        const next = Math.floor(easeProgress);
+
+        if (next <= this.backPosition || progress >= 1) {
           window.scrollTo(0, this.backPosition);
-          clearInterval(this.interval);
           this.isMoving = false;
         } else {
           window.scrollTo(0, next);
+          this.animationId = requestAnimationFrame(animateScroll);
         }
-        i++;
-      }, 16.7);
+      };
+
+      this.animationId = requestAnimationFrame(animateScroll);
     },
     easeInOutQuad(t, b, c, d) {
       if ((t /= d / 2) < 1) return c / 2 * t * t + b;

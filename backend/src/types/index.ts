@@ -54,7 +54,7 @@ export interface LoginLog {
   timestamp: Date;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data?: T;
@@ -62,12 +62,13 @@ export interface ApiResponse<T = any> {
   errors?: Array<{
     field: string;
     message: string;
-    value?: any;
+    value?: unknown;
   }>;
   timestamp: Date;
+  code?: string; // 错误代码
 }
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T> {
+export interface PaginatedResponse<T = unknown> extends ApiResponse<T> {
   pagination: {
     page: number;
     limit: number;
@@ -80,6 +81,7 @@ export interface JWTPayload {
   userId: string;
   username: string;
   roles: string[];
+  fingerprint?: string; // 令牌指纹
   iat?: number;
   exp?: number;
 }
@@ -115,7 +117,7 @@ export interface QueryOptions {
   sort?: string;
   order?: 'asc' | 'desc';
   search?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface FileInfo {
@@ -127,4 +129,5 @@ export interface FileInfo {
   url: string;
   uploadedAt: Date;
   uploadedBy?: string;
+  hash?: string; // 文件哈希值，用于完整性验证
 }

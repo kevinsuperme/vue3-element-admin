@@ -1,0 +1,11 @@
+{
+  "name": "init-db",
+  "version": "1.0.0",
+  "description": "Database initialization script",
+  "main": "dist/scripts/initDatabase.js",
+  "scripts": {
+    "init": "ts-node src/scripts/initDatabase.ts",
+    "init:prod": "node dist/scripts/initDatabase.js",
+    "reset": "ts-node src/scripts/initDatabase.ts --reset"
+  }
+}

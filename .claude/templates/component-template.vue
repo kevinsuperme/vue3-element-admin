@@ -19,8 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, computed, onMounted, watch } from 'vue';
+import { ElMessage } from 'element-plus';
 
 // ==================== Props ====================
 interface Props {
@@ -30,8 +30,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   title: '默认标题',
-  data: null,
-})
+  data: null
+});
 
 // ==================== Emits ====================
 interface Emits {
@@ -39,50 +39,50 @@ interface Emits {
   (e: 'delete', id: string): void
 }
 
-const emit = defineEmits<Emits>()
+const emit = defineEmits<Emits>();
 
 // ==================== State ====================
-const isLoading = ref(false)
-const message = ref('Hello World')
+const isLoading = ref(false);
+const message = ref('Hello World');
 
 // ==================== Computed ====================
 const displayTitle = computed(() => {
-  return props.title || '未设置标题'
-})
+  return props.title || '未设置标题';
+});
 
 // ==================== Watch ====================
 watch(() => props.data, (newVal) => {
-  console.log('Data changed:', newVal)
-}, { deep: true })
+  console.log('Data changed:', newVal);
+}, { deep: true });
 
 // ==================== Methods ====================
 async function fetchData() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
     // API 调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    ElMessage.success('数据加载成功')
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    ElMessage.success('数据加载成功');
   } catch (error) {
-    ElMessage.error('数据加载失败')
-    console.error(error)
+    ElMessage.error('数据加载失败');
+    console.error(error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 function handleAction() {
-  emit('update', { message: 'Updated' })
+  emit('update', { message: 'Updated' });
 }
 
 // ==================== Lifecycle ====================
 onMounted(() => {
-  fetchData()
-})
+  fetchData();
+});
 
 // ==================== Expose ====================
 defineExpose({
-  refresh: fetchData,
-})
+  refresh: fetchData
+});
 </script>
 
 <style lang="scss" scoped>
