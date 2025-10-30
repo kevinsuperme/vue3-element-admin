@@ -276,7 +276,7 @@ describe('AuthController', () => {
 
       // Mock getProfile方法
       const mockGetProfile = jest.spyOn(AuthController, 'getProfile' as any)
-        .mockImplementation(async (req, res, next) => {
+        .mockImplementation(async (req: any, res: any, next: any) => {
           res.json({
             success: true,
             message: '获取用户信息成功',
@@ -374,7 +374,7 @@ describe('AuthController', () => {
 
       // Mock changePassword方法
       const mockChangePassword = jest.spyOn(AuthController, 'changePassword' as any)
-        .mockImplementation(async (req, res, next) => {
+        .mockImplementation(async (req: any, res: any, next: any) => {
           res.json({
             success: true,
             message: '密码修改成功',
@@ -411,7 +411,7 @@ describe('AuthController', () => {
       const error = new Error('新密码确认不匹配');
 
       const mockChangePassword = jest.spyOn(AuthController, 'changePassword' as any)
-        .mockImplementation(async (req, res, next) => {
+        .mockImplementation(async (req: any, res: any, next: any) => {
           throw error;
         });
 
@@ -438,7 +438,7 @@ describe('AuthController', () => {
       const error = new Error('旧密码不正确');
 
       const mockChangePassword = jest.spyOn(AuthController, 'changePassword' as any)
-        .mockImplementation(async (req, res, next) => {
+        .mockImplementation(async (req: any, res: any, next: any) => {
           throw error;
         });
 
@@ -459,7 +459,7 @@ describe('AuthController', () => {
 
       // Mock logout方法
       const mockLogout = jest.spyOn(AuthController, 'logout' as any)
-        .mockImplementation(async (req, res, next) => {
+        .mockImplementation(async (req: any, res: any, next: any) => {
           res.json({
             success: true,
             message: '登出成功',
@@ -546,7 +546,7 @@ describe('AuthController', () => {
 
       await AuthController.register(mockRequest as Request, mockResponse as Response, nextFunction);
 
-      const response = mockResponse.json.mock.calls[0][0];
+      const response = (mockResponse.json as any).mock.calls[0][0];
 
       expect(response).toHaveProperty('success', true);
       expect(response).toHaveProperty('message');

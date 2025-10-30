@@ -12,6 +12,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { generalLimiter } from './middleware/rateLimiter';
 import { sanitizeInput, preventSqlInjection, preventNoScriptInjection } from './middleware/sanitize';
 import { performanceMiddleware } from './utils/performance';
+import { setupSwagger } from './config/swagger';
 import apiRoutes from './routes/api';
 
 class App {
@@ -23,6 +24,7 @@ class App {
     this.initializeRoutes();
     this.initializeErrorHandling();
     this.connectToDatabase();
+    this.setupSwagger();
   }
 
   private initializeMiddlewares() {
@@ -173,6 +175,19 @@ class App {
         reject(error);
       });
     });
+  }
+
+  /**
+   * Setup Swagger API documentation
+   */
+  private setupSwagger(): void {
+    if (config.env === 'production' && process.env.ENABLE_SWAGGER !== 'true') {
+      logger.info('Swagger disabled in production');
+      return;
+    }
+
+    setupSwagger(this.app);
+    logger.info('Swagger API documentation enabled');
   }
 }
 

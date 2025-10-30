@@ -1,0 +1,281 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vue3-admin-backend
+  namespace: vue3-admin
+  labels:
+    app: vue3-admin
+    component: backend
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: vue3-admin
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: vue3-admin
+        component: backend
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: backend
+        image: vue3-admin-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: vue3-admin-secrets
+              key: mongodb-uri
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: vue3-admin-secrets
+              key: jwt-secret
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: vue3-admin-secrets
+              key: session-secret
+        - name: CORS_ORIGIN
+          value: "https://vue3-admin.example.com"
+        - name: ENABLE_SWAGGER
+          value: "false"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/system/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/system/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: vue3-admin-uploads-pvc
+      - name: logs
+        persistentVolumeClaim:
+          claimName: vue3-admin-logs-pvc
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      terminationGracePeriodSeconds: 30
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - vue3-admin
+                - key: component
+                  operator: In
+                  values:
+                  - backend
+              topologyKey: kubernetes.io/hostname
+      tolerations:
+      - key: "node-role.kubernetes.io/worker"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vue3-admin-backend-service
+  namespace: vue3-admin
+  labels:
+    app: vue3-admin
+    component: backend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/metrics"
+spec:
+  selector:
+    app: vue3-admin
+    component: backend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vue3-admin-backend-headless
+  namespace: vue3-admin
+  labels:
+    app: vue3-admin
+    component: backend
+spec:
+  selector:
+    app: vue3-admin
+    component: backend
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+  clusterIP: None
+  publishNotReadyAddresses: true
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vue3-admin-backend-hpa
+  namespace: vue3-admin
+  labels:
+    app: vue3-admin
+    component: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vue3-admin-backend
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: vue3-admin-backend-pdb
+  namespace: vue3-admin
+  labels:
+    app: vue3-admin
+    component: backend
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: vue3-admin
+      component: backend
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vue3-admin-backend-config
+  namespace: vue3-admin
+  labels:
+    app: vue3-admin
+    component: backend
+data:
+  nginx.conf: |
+    upstream backend {
+        server vue3-admin-backend-service:3000;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vue3-admin-secrets
+  namespace: vue3-admin
+  labels:
+    app: vue3-admin
+type: Opaque
+data:
+  mongodb-uri: bW9uZ29kYjovL21vbmdvLXNlcnZpY2U6cGFzc3dvcmRAbW9uZ29kYjozMDAxNy92dWUzLWFkbWluP2F1dGhTb3VyY2U9YWRtaW4=  # Base64 encoded
+  jwt-secret: c3VwZXItc2VjcmV0LWp3dC1rZXktZm9yLXByb2R1Y3Rpb24tb25seQ==  # Base64 encoded
+  session-secret: c3VwZXItc2VjcmV0LXNlc3Npb24ta2V5LWZvci1wcm9kdWN0aW9uLW9ubHk=  # Base64 encoded

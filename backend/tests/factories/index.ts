@@ -8,7 +8,7 @@ export class UserTestFactory {
   static create(overrides?: Partial<any>) {
     return {
       _id: new mongoose.Types.ObjectId(),
-      username: faker.internet.userName(),
+      username: faker.internet.username(),
       email: faker.internet.email(),
       password: faker.internet.password(12, true, /[A-Z]/, 'Aa1!'),
       avatar: faker.internet.avatar(),
@@ -40,7 +40,7 @@ export class LoginLogTestFactory {
   static create(overrides?: Partial<any>) {
     return {
       _id: new mongoose.Types.ObjectId(),
-      username: faker.internet.userName(),
+      username: faker.internet.username(),
       ip: faker.internet.ip(),
       userAgent: faker.internet.userAgent(),
       success: true,
@@ -137,7 +137,7 @@ export class TestHelpers {
       originalUrl: faker.internet.url(),
       user: {
         userId: faker.datatype.uuid(),
-        username: faker.internet.userName(),
+        username: faker.internet.username(),
         roles: ['user']
       },
       ...overrides
