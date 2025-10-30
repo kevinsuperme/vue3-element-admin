@@ -3,7 +3,7 @@
     <el-card v-loading="isLoading">
       <template #header>
         <div class="card-header">
-          <span>{{ title }}</span>
+          <span>{{ displayTitle }}</span>
           <el-button type="primary" size="small" @click="handleAction">
             操作
           </el-button>
@@ -52,6 +52,7 @@ const displayTitle = computed(() => {
 
 // ==================== Watch ====================
 watch(() => props.data, (newVal) => {
+  // eslint-disable-next-line no-console
   console.log('Data changed:', newVal);
 }, { deep: true });
 
@@ -64,6 +65,7 @@ async function fetchData() {
     ElMessage.success('数据加载成功');
   } catch (error) {
     ElMessage.error('数据加载失败');
+    // eslint-disable-next-line no-console
     console.error(error);
   } finally {
     isLoading.value = false;
