@@ -10,8 +10,8 @@ export class UserTestFactory {
       _id: new mongoose.Types.ObjectId(),
       username: faker.internet.username(),
       email: faker.internet.email(),
-      password: faker.internet.password(12, true, /[A-Z]/, 'Aa1!'),
-      avatar: faker.internet.avatar(),
+      password: faker.internet.password({ length: 12, memorable: false, pattern: /[A-Za-z0-9!@#]/ }),
+      avatar: faker.image.avatar(),
       roles: ['user'],
       isActive: true,
       lastLogin: faker.date.recent(),
@@ -71,7 +71,7 @@ export class ErrorLogTestFactory {
       url: faker.internet.url(),
       userAgent: faker.internet.userAgent(),
       ip: faker.internet.ip(),
-      userId: faker.datatype.uuid(),
+      userId: faker.string.uuid(),
       timestamp: faker.date.recent(),
       resolved: false,
       ...overrides
@@ -87,17 +87,17 @@ export class FileTestFactory {
     return {
       _id: new mongoose.Types.ObjectId(),
       originalName: faker.system.fileName(),
-      filename: faker.system.fileName() + '.jpg',
+      filename: `${faker.system.fileName()}.jpg`,
       mimetype: 'image/jpeg',
-      size: faker.datatype.number({ min: 1000, max: 5000000 }),
+      size: faker.number.int({ min: 1000, max: 5000000 }),
       path: faker.system.filePath(),
       url: faker.internet.url(),
       uploadedBy: new mongoose.Types.ObjectId(),
       isPublic: true,
       tags: [faker.lorem.word(), faker.lorem.word()],
       metadata: {
-        width: faker.datatype.number({ min: 100, max: 1920 }),
-        height: faker.datatype.number({ min: 100, max: 1080 })
+        width: faker.number.int({ min: 100, max: 1920 }),
+        height: faker.number.int({ min: 100, max: 1080 })
       },
       createdAt: faker.date.recent(),
       ...overrides
@@ -111,18 +111,18 @@ export class FileTestFactory {
 export class TestHelpers {
   static generateValidUser() {
     return {
-      username: 'testuser_' + Date.now(),
+      username: `testuser_${Date.now()}`,
       email: `test_${Date.now()}@example.com`,
       password: 'Test123!@#',
       confirmPassword: 'Test123!@#'
     };
   }
 
-  static generateJWTToken(userId: string) {
+  static generateJWTToken(_userId: string) {
     return {
-      accessToken: faker.datatype.string(64),
-      refreshToken: faker.datatype.string(64),
-      tokenFingerprint: faker.datatype.uuid()
+      accessToken: faker.string.alphanumeric(64),
+      refreshToken: faker.string.alphanumeric(64),
+      tokenFingerprint: faker.string.uuid()
     };
   }
 
@@ -136,7 +136,7 @@ export class TestHelpers {
       method: 'GET',
       originalUrl: faker.internet.url(),
       user: {
-        userId: faker.datatype.uuid(),
+        userId: faker.string.uuid(),
         username: faker.internet.username(),
         roles: ['user']
       },
