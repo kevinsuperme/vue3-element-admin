@@ -83,7 +83,7 @@ export default defineComponent({
 
       this.isMoving = true;
 
-      const animateScroll = (currentTime: number) => {
+      const animateScroll = (currentTime) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
