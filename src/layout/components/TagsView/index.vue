@@ -26,12 +26,18 @@
 import { defineComponent } from 'vue';
 import ScrollPane from './ScrollPane';
 import path from 'path-browserify';
-import store from '@/store';
+import { usePermissionStore } from '@/store/modules/permission';
+import { useTagsViewStore } from '@/store/modules/tagsView';
 import { Close as IconClose } from '@element-plus/icons-vue';
 
 export default defineComponent({
   name: 'TagsView',
   components: { ScrollPane, IconClose },
+  setup() {
+    const permissionStore = usePermissionStore();
+    const tagsViewStore = useTagsViewStore();
+    return { permissionStore, tagsViewStore };
+  },
   data() {
     return {
       visible: false,
@@ -43,10 +49,10 @@ export default defineComponent({
   },
   computed: {
     visitedViews() {
-      return store.tagsView.visitedViews;
+      return this.tagsViewStore.visitedViews;
     },
     routes() {
-      return store.permission.routes;
+      return this.permissionStore.routes;
     }
   },
   watch: {
@@ -99,14 +105,14 @@ export default defineComponent({
       for (const tag of affixTags) {
         // Must have tag name
         if (tag.name) {
-          store.tagsView.addVisitedView(tag);
+          this.tagsViewStore.addVisitedView(tag);
         }
       }
     },
     addTags() {
       const { name } = this.$route;
       if (name) {
-        store.tagsView.addView(this.$route);
+        this.tagsViewStore.addView(this.$route);
       }
       return false;
     },
@@ -118,7 +124,7 @@ export default defineComponent({
             this.$refs.scrollPane.moveToTarget(tag);
             // when query is different then update
             if (tag.to.fullPath !== this.$route.fullPath) {
-              store.tagsView.updateVisitedView(this.$route);
+              this.tagsViewStore.updateVisitedView(this.$route);
             }
             break;
           }
@@ -126,7 +132,7 @@ export default defineComponent({
       });
     },
     refreshSelectedTag(view) {
-      store.tagsView.delCachedView(view);
+      this.tagsViewStore.delCachedView(view);
       const { fullPath } = view;
       this.$nextTick(() => {
         this.$router.replace({
@@ -135,20 +141,20 @@ export default defineComponent({
       });
     },
     closeSelectedTag(view) {
-      store.tagsView.delView(view);
-      const visitedViews = store.tagsView.visitedViews;
+      this.tagsViewStore.delView(view);
+      const visitedViews = this.tagsViewStore.visitedViews;
       if (this.isCurrentRoute(view)) {
         this.toLastView(visitedViews, view);
       }
     },
     closeOthersTags() {
       this.$router.push(this.selectedTag);
-      store.tagsView.delOthersViews(this.selectedTag);
+      this.tagsViewStore.delOthersViews(this.selectedTag);
       this.moveToCurrentTag();
     },
     closeAllTags(view) {
-      store.tagsView.delAllViews();
-      const visitedViews = store.tagsView.visitedViews;
+      this.tagsViewStore.delAllViews();
+      const visitedViews = this.tagsViewStore.visitedViews;
       if (this.affixTags.some(tag => tag.path === view.path)) {
         return;
       }
