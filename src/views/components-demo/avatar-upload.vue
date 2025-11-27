@@ -16,7 +16,8 @@
       :key="imagecropperKey"
       :width="300"
       :height="300"
-      url="https://httpbin.org/post"
+      field="file"
+      url="/api/files/upload/single"
       lang-type="en"
       @close="close"
       @crop-upload-success="cropSuccess"
@@ -45,7 +46,7 @@ export default defineComponent({
     cropSuccess(resData) {
       this.imagecropperShow = false;
       this.imagecropperKey = this.imagecropperKey + 1;
-      this.image = resData.files.avatar;
+      this.image = resData.url;
     },
     close() {
       this.imagecropperShow = false;
@@ -61,4 +62,3 @@ export default defineComponent({
     border-radius: 50%;
   }
 </style>
-
