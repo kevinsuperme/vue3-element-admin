@@ -4,6 +4,7 @@ import JWTService from './JWTService';
 import logger from '../utils/logger';
 import { performanceMonitor } from '../utils/performance';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 
 export class AuthService {
   // 登录失败记录缓存（使用内存缓存，生产环境建议使用Redis）
@@ -150,6 +151,10 @@ export class AuthService {
         ip,
         requestId
       });
+
+      if (mongoose.connection?.readyState !== 1) {
+        throw new Error('数据库未连接');
+      }
 
       // 检查登录限制
       if (this.isLoginBlocked(username)) {
