@@ -102,6 +102,18 @@ export const constantRoutes:RouteRecordRaw[] = [
         meta: { title: '个人中心', icon: 'user', noCache: true }
       }
     ]
+  },
+  {
+    path: '/error-log',
+    component: Layout,
+    children: [
+      {
+        path: 'log',
+        component: () => import('@/views/error-log/index.vue'),
+        name: 'ErrorLog',
+        meta: { title: '错误日志', icon: 'bug' }
+      }
+    ]
   }
 ];
 
@@ -242,18 +254,6 @@ export const asyncRoutes:RouteRecordRaw[] = [
     ]
   },
 
-  {
-    path: '/error-log',
-    component: Layout,
-    children: [
-      {
-        path: 'log',
-        component: () => import('@/views/error-log/index.vue'),
-        name: 'ErrorLog',
-        meta: { title: '错误日志', icon: 'bug' }
-      }
-    ]
-  },
 
   {
     path: '/excel',
