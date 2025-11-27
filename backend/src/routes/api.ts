@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authRoutes, logRoutes, systemRoutes, fileRoutes } from './index';
+import { authRoutes, logRoutes, systemRoutes, fileRoutes, vueElementAdminRoutes } from './index';
 import { errorHandler } from '../middleware/errorHandler';
 
 const router = Router();
@@ -27,6 +27,8 @@ router.use('/users', authRoutes); // 用户管理路由使用authRoutes中的/us
 router.use('/logs', logRoutes);
 router.use('/system', systemRoutes);
 router.use('/files', fileRoutes);
+// 演示模块兼容路由（与前端示例保持一致）
+router.use('/vue-element-admin', vueElementAdminRoutes);
 
 // 404处理
 router.use('*', (req, res) => {

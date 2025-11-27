@@ -94,7 +94,13 @@ export default defineComponent({
     },
     async getRoles() {
       const res = await getRoles();
-      this.rolesList = res.data;
+      const list = res?.data?.items || res?.data || [];
+      this.rolesList = list.map((r) => ({
+        key: r.key || r.code || r.id || r._id,
+        name: r.name,
+        description: r.description,
+        routes: r.routes || []
+      }));
     },
     resolvePath(basePath, routePath) {
       // console.log('basePath=' + basePath, 'routePath=' + routePath);
@@ -216,7 +222,7 @@ export default defineComponent({
         }
       } else {
         const { data } = await addRole(this.role);
-        this.role.key = data.key;
+        this.role.key = data?.key || data?.code || data?.id || data?._id || this.role.key;
         this.rolesList.push(this.role);
       }
 

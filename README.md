@@ -416,6 +416,17 @@ VITE_COOKIE = ''
 - 基准地址使用 `VITE_BASE_API`，默认 `'/'`；后端接口以绝对路径 `/api/...` 访问。
 - 生产环境默认关闭 Mock（`vite.config.ts` 中 `prodMock = false`），如需在生产启用，请显式改为 `true`。
 
+#### 演示接口兼容路径 🆕
+- 基于后端提供 `/api/vue-element-admin/*` 兼容前端示例模块：
+  - 文章：`/api/vue-element-admin/article/list|detail|create|update|pv`
+  - 角色：`/api/vue-element-admin/roles`、`/api/vue-element-admin/role`（REST）
+  - 路由：`/api/vue-element-admin/routes`
+  - 远程搜索：`/api/vue-element-admin/search/user`
+  - 交易列表：`/api/vue-element-admin/transaction/list`
+- 返回结构兼容 Mock 与后端统一格式，前端已做兼容处理：
+  - Mock：`{ code: 20000, data: ... }`
+  - 后端：`{ success: true, message, data, timestamp }`
+
 ### 后端环境配置
 后端使用 `.env` 文件进行配置：
 
