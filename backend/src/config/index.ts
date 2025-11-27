@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import logger from '../utils/logger';
 
 // 加载环境变量
 dotenv.config();
@@ -95,7 +94,7 @@ const generateJWTSecret = (): string => {
       throw new Error('JWT_SECRET environment variable is required in production');
     }
     // 开发环境使用固定的测试密钥，避免重启后令牌失效
-    logger.warn('Using fixed test JWT secret for development. Set JWT_SECRET environment variable for production.');
+    process.stderr.write('Using fixed test JWT secret for development. Set JWT_SECRET environment variable for production.\n');
     return 'development-jwt-secret-key-64-bytes-long-for-testing-only';
   }
   return secret;
@@ -108,7 +107,7 @@ const generateSessionSecret = (): string => {
     if (nodeEnv === 'production') {
       throw new Error('SESSION_SECRET environment variable is required in production');
     }
-    logger.warn('Using random session secret for development. Set SESSION_SECRET environment variable for production.');
+    process.stderr.write('Using random session secret for development. Set SESSION_SECRET environment variable for production.\n');
     return require('crypto').randomBytes(64).toString('hex');
   }
   return secret;

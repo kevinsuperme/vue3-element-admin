@@ -424,6 +424,7 @@ VITE_COOKIE = ''
   - 用户：`POST /api/vue-element-admin/user/login`、`GET /api/vue-element-admin/user/info`、`POST /api/vue-element-admin/user/logout`
   - 远程搜索：`/api/vue-element-admin/search/user`
   - 交易列表：`/api/vue-element-admin/transaction/list`
+  - 第三方演示：`GET /api/qiniu/upload/token`（示例返回假凭证）
 - 返回结构兼容 Mock 与后端统一格式，前端已做兼容处理：
   - Mock：`{ code: 20000, data: ... }`
   - 后端：`{ success: true, message, data, timestamp }`

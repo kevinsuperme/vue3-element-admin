@@ -30,6 +30,17 @@ router.use('/files', fileRoutes);
 // 演示模块兼容路由（与前端示例保持一致）
 router.use('/vue-element-admin', vueElementAdminRoutes);
 
+// 第三方示例：七牛上传凭证（示例返回，非真实凭证）
+router.get('/qiniu/upload/token', (req, res) => {
+  res.json({
+    code: 20000,
+    data: {
+      token: 'demo-upload-token',
+      expiresIn: 3600
+    }
+  });
+});
+
 // 404处理
 router.use('*', (req, res) => {
   res.status(404).json({
