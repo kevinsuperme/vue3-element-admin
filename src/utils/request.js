@@ -50,18 +50,16 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data;
+    const hasCode = res && typeof res === 'object' && Object.prototype.hasOwnProperty.call(res, 'code');
+    const hasSuccess = res && typeof res === 'object' && Object.prototype.hasOwnProperty.call(res, 'success');
 
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
+    if (hasCode && res.code !== 20000) {
       ElMessage({
         message: res.message || 'Error',
         type: 'error',
         duration: 5 * 1000
       });
-
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-        // to re-login
         ElMessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
           confirmButtonText: 'Re-Login',
           cancelButtonText: 'Cancel',
@@ -79,9 +77,18 @@ service.interceptors.response.use(
         });
       }
       return Promise.reject(new Error(res.message || 'Error'));
-    } else {
-      return res;
     }
+
+    if (hasSuccess && res.success !== true) {
+      ElMessage({
+        message: res.message || 'Error',
+        type: 'error',
+        duration: 5 * 1000
+      });
+      return Promise.reject(new Error(res.message || 'Error'));
+    }
+
+    return res;
   },
   error => {
     console.log('err' + error); // for debug

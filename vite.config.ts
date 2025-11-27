@@ -28,7 +28,7 @@ export default defineConfig(({ command, mode }) => {
     env = loadEnv(mode, process.cwd(), '');
   }
   // According to the project configuration. Can be configured in the .env file
-  const prodMock = true;
+  const prodMock = false;
 
   // 解决终端 optimized dependencies changed. reloading 问题
   const optimizeDepsElementPlusIncludes = ['element-plus/es'];

@@ -1,11 +1,18 @@
+/*
+ * @Author: kevinsuperme iphone.com@live.cn
+ * @Date: 2025-10-30 03:24:27
+ * @LastEditors: kevinsuperme iphone.com@live.cn
+ * @LastEditTime: 2025-11-28 01:17:38
+ * @FilePath: \vue3-element-admin\src\utils\request.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import axios from 'axios';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getToken, removeToken } from '@/utils/auth';
 
-// 创建axios实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API || 'http://localhost:3000/api', // 后端API基础URL
-  timeout: 60000 // 请求超时时间
+  baseURL: import.meta.env.VITE_BASE_API || '/',
+  timeout: 60000
 });
 
 // 请求拦截器
@@ -24,39 +31,41 @@ service.interceptors.request.use(
   }
 );
 
-// 响应拦截器
 service.interceptors.response.use(
   response => {
     const res = response.data;
+    const hasCode = res && typeof res === 'object' && Object.prototype.hasOwnProperty.call(res, 'code');
+    const hasSuccess = res && typeof res === 'object' && Object.prototype.hasOwnProperty.call(res, 'success');
 
-    // 如果自定义状态码不是200，则判断为错误
-    if (res.code !== 20000) {
+    if (hasCode && res.code !== 20000) {
       ElMessage({
         message: res.message || 'Error',
         type: 'error',
         duration: 5 * 1000
       });
-
-      // 50008: 非法令牌; 50012: 其他客户端登录; 50014: 令牌过期;
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-        // 重新登录
-        ElMessageBox.confirm(
-          '您已登出，请重新登录',
-          '确认登出',
-          {
-            confirmButtonText: '重新登录',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        ).then(() => {
+        ElMessageBox.confirm('您已登出，请重新登录', '确认登出', {
+          confirmButtonText: '重新登录',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
           removeToken();
           location.reload();
         });
       }
       return Promise.reject(new Error(res.message || 'Error'));
-    } else {
-      return res;
     }
+
+    if (hasSuccess && res.success !== true) {
+      ElMessage({
+        message: res.message || 'Error',
+        type: 'error',
+        duration: 5 * 1000
+      });
+      return Promise.reject(new Error(res.message || 'Error'));
+    }
+
+    return res;
   },
   error => {
     console.log('Response Error:', error);

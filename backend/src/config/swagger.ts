@@ -345,10 +345,10 @@ const swaggerOptions = {
     ]
   },
   apis: [
-    './src/routes/*.ts',           // Route files
-    './src/controllers/*.ts',      // Controller files
-    './src/models/*.ts'           // Model files
-  ],
+    './src/routes/*.ts', // Route files
+    './src/controllers/*.ts', // Controller files
+    './src/models/*.ts' // Model files
+  ]
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -475,7 +475,7 @@ export const swagger = {
       schema: {
         allOf: [
           { $ref: '#/components/schemas/ApiResponse' },
-          schema ? { properties: { data: schema } } : {}
+          schema ? { properties: { data: schema }} : {}
         ]
       }
     }),
@@ -485,7 +485,7 @@ export const swagger = {
       schema: {
         allOf: [
           { $ref: '#/components/schemas/ApiResponse' },
-          schema ? { properties: { data: schema } } : {}
+          schema ? { properties: { data: schema }} : {}
         ]
       }
     }),

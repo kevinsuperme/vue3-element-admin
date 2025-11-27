@@ -38,8 +38,9 @@ const useUserStore = defineStore('user', {
       return new Promise((resolve, reject) => {
         apiLogin({ username: username.trim(), password: password }).then(response => {
           const { data } = response;
-          this.token = data.token;
-          setToken(data.token);
+          const token = (data && (data as any).tokens && (data as any).tokens.accessToken) || (data as any).token || '';
+          this.token = token;
+          if (token) setToken(token);
           resolve();
         }).catch(error => {
           reject(error);
@@ -50,7 +51,7 @@ const useUserStore = defineStore('user', {
     // get user info
     getInfo(): Promise<IUserInfo> {
       return new Promise((resolve, reject) => {
-        apiGetInfo(this.token).then(response => {
+        apiGetInfo().then(response => {
           const { data } = response;
 
           if (!data) {
@@ -78,7 +79,7 @@ const useUserStore = defineStore('user', {
     // user logout
     logout():Promise<void> {
       return new Promise((resolve, reject) => {
-        apiLogout(this.token).then(() => {
+        apiLogout().then(() => {
           this.token = '';
           this.roles = [];
           removeToken();

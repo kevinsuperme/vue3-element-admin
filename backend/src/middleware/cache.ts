@@ -101,7 +101,6 @@ export const responseCache = (options: CacheOptions = {}) => {
           logger.debug('Response cached:', { key: req.cacheKey, ttl: req.cacheTTL });
         }
       });
-
     } catch (error) {
       logger.error('Cache middleware error:', error);
       next(); // Continue without caching on error

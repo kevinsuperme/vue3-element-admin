@@ -35,7 +35,7 @@ class CacheService {
           const targetError = 'READONLY';
           return err.message.includes(targetError);
         },
-        retryDelayOnClusterDown: 300,
+        retryDelayOnClusterDown: 300
       });
 
       // Event listeners
@@ -62,7 +62,6 @@ class CacheService {
 
       // Connect to Redis
       await this.client.connect();
-
     } catch (error) {
       logger.error('Failed to initialize Redis:', error);
       this.connected = false;

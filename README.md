@@ -411,6 +411,11 @@ VITE_ENV = 'development'
 VITE_COOKIE = ''
 ```
 
+#### 请求层统一说明 🆕
+- 成功判断兼容两种结构：Mock接口使用 `code === 20000`，后端接口使用 `success === true`。
+- 基准地址使用 `VITE_BASE_API`，默认 `'/'`；后端接口以绝对路径 `/api/...` 访问。
+- 生产环境默认关闭 Mock（`vite.config.ts` 中 `prodMock = false`），如需在生产启用，请显式改为 `true`。
+
 ### 后端环境配置
 后端使用 `.env` 文件进行配置：
 
@@ -624,7 +629,7 @@ backend/src/
 
 #### 前端无法连接后端API
 1. 确认后端服务已启动并运行在3000端口
-2. 检查前端 `.env` 文件中的 `VITE_API_BASE_URL` 配置
+2. 检查前端 `.env` 文件中的 `VITE_BASE_API` 配置
 3. 确认CORS配置允许前端域名访问
 
 #### 文件上传功能异常
@@ -864,5 +869,3 @@ npm run lint
 ## 参与贡献
 
 我们非常欢迎你的贡献，你可以通过以下方式和我们一起共建基线框架：
-
-
