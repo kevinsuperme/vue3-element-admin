@@ -153,7 +153,33 @@ export class AuthService {
       });
 
       if (mongoose.connection?.readyState !== 1) {
-        throw new Error('数据库未连接');
+        const bypass = process.env.DEV_LOGIN_BYPASS === 'true' && process.env.NODE_ENV !== 'production';
+        if (!bypass) {
+          throw new Error('数据库未连接');
+        }
+
+        const mockUser = {
+          _id: 'dev-user-id',
+          username: username || 'dev-admin',
+          email: 'dev@example.com',
+          avatar: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=identicon&s=200',
+          roles: ['admin'],
+          isActive: true,
+          lastLogin: new Date(),
+          comparePassword: async () => true,
+          generateAvatar: () => '',
+          updateLastLogin: async () => {}
+        } as unknown as UserDocument;
+
+        const payload: JWTPayload = {
+          userId: mockUser._id!.toString(),
+          username: mockUser.username,
+          roles: mockUser.roles
+        };
+
+        const tokens = JWTService.generateTokenPair(payload);
+
+        return { user: mockUser, tokens };
       }
 
       // 检查登录限制
@@ -363,6 +389,25 @@ export class AuthService {
 
   // 获取用户信息
   static async getUserInfo(userId: string): Promise<UserDocument | null> {
+    if (mongoose.connection?.readyState !== 1) {
+      const bypass = process.env.DEV_LOGIN_BYPASS === 'true' && process.env.NODE_ENV !== 'production';
+      if (bypass) {
+        const mockUser = {
+          _id: userId || 'dev-user-id',
+          username: 'dev-admin',
+          email: 'dev@example.com',
+          avatar: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=identicon&s=200',
+          roles: ['admin'],
+          isActive: true,
+          lastLogin: new Date(),
+          comparePassword: async () => true,
+          generateAvatar: () => '',
+          updateLastLogin: async () => {}
+        } as unknown as UserDocument;
+        return mockUser;
+      }
+      return null;
+    }
     return User.findById(userId);
   }
 
