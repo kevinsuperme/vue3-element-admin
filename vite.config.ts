@@ -102,6 +102,10 @@ export default defineConfig(({ command, mode }) => {
       host: 'localhost',
       port: 8001,
       proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true
+        },
         '/api-test': {
           target: 'https://api.midfar.com/dspt_test/api',
           changeOrigin: true,

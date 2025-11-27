@@ -1,6 +1,15 @@
+/*
+ * @Author: kevinsuperme iphone.com@live.cn
+ * @Date: 2025-10-30 15:14:06
+ * @LastEditors: kevinsuperme iphone.com@live.cn
+ * @LastEditTime: 2025-11-28 01:31:44
+ * @FilePath: \vue3-element-admin\backend\src\routes\vue-element-admin.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import { Router } from 'express';
 import { authenticate as auth } from '../middleware/auth';
 import { RoleController } from '../controllers/roleController';
+import { AuthController } from '../controllers/authController';
 import { userRoutes } from './users';
 import { articleRoutes } from './articles';
 import { roleRoutes } from './roles';
@@ -26,6 +35,10 @@ const router = Router();
 
 // 用户相关路由
 router.use('/user', userRoutes);
+// 兼容前端示例登录/信息/登出
+router.post('/user/login', AuthController.login);
+router.get('/user/info', auth, AuthController.getCurrentUser);
+router.post('/user/logout', auth, AuthController.logout);
 
 // 文章相关路由
 router.use('/article', articleRoutes);

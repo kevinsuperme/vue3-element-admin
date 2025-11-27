@@ -421,11 +421,17 @@ VITE_COOKIE = ''
   - 文章：`/api/vue-element-admin/article/list|detail|create|update|pv`
   - 角色：`/api/vue-element-admin/roles`、`/api/vue-element-admin/role`（REST）
   - 路由：`/api/vue-element-admin/routes`
+  - 用户：`POST /api/vue-element-admin/user/login`、`GET /api/vue-element-admin/user/info`、`POST /api/vue-element-admin/user/logout`
   - 远程搜索：`/api/vue-element-admin/search/user`
   - 交易列表：`/api/vue-element-admin/transaction/list`
 - 返回结构兼容 Mock 与后端统一格式，前端已做兼容处理：
   - Mock：`{ code: 20000, data: ... }`
   - 后端：`{ success: true, message, data, timestamp }`
+
+#### 开发代理配置 🆕
+- Vite 开发服务器已为 `/api` 添加代理，指向后端默认端口 `http://localhost:3000`：
+  - `vite.config.ts:101-114` 中 `server.proxy['/api']`
+- 如需修改后端端口，可在 `backend/.env` 设置 `PORT`，并同步更新前端代理目标。
 
 ### 后端环境配置
 后端使用 `.env` 文件进行配置：
