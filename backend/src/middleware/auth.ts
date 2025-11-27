@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import JWTService from '../services/JWTService';
 import { User } from '../models';
 import { JWTPayload } from '../types';
+import mongoose from 'mongoose';
 
 export interface AuthRequest extends Request {
   user?: JWTPayload;
@@ -33,6 +34,14 @@ export const authenticate = async (req: AuthRequest, res: Response, _next: NextF
 
     try {
       const payload = JWTService.verifyToken(token);
+
+      // 开发旁路：数据库未连接且允许旁路时，跳过数据库校验
+      const bypass = process.env.DEV_LOGIN_BYPASS === 'true' && process.env.NODE_ENV !== 'production';
+      if (mongoose.connection?.readyState !== 1 && bypass) {
+        req.user = payload;
+        _next();
+        return;
+      }
 
       // 验证用户是否仍然存在且活跃
       const user = await User.findById(payload.userId);
