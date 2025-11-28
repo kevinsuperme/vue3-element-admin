@@ -230,7 +230,7 @@ describe('Hamburger Component', () => {
     });
 
     it('应该正确清理事件监听器', () => {
-      const spy = vi.spyOn(wrapper.vm, '$off');
+      vi.spyOn(wrapper.vm, '$off');
 
       wrapper.unmount();
 
