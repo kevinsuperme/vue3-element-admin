@@ -3,7 +3,7 @@
  * @description: 测试用户状态管理的功能
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setActivePinia, createPinia, defineStore } from 'pinia';
+import { setActivePinia, createPinia } from 'pinia';
 import { userStore } from '@/store/modules/user';
 import * as userApi from '@/api/user';
 
@@ -20,14 +20,7 @@ vi.mock('@/api/user', () => ({
 
 const mockUserApi = vi.mocked(userApi);
 
-// Mock router
-const mockRouter = {
-  push: vi.fn(),
-  replace: vi.fn(),
-  go: vi.fn(),
-  back: vi.fn(),
-  forward: vi.fn()
-};
+// 移除未使用的路由mock，保持测试聚焦于store逻辑
 
 // Mock Element Plus
 const mockElMessage = {

@@ -630,7 +630,7 @@ describe('Authentication API Integration Tests', () => {
         if (loginResponse.status === 200) {
           adminToken = loginResponse.body.data.tokens.accessToken;
         }
-      } catch (error) {
+      } catch {
         // 尝试注册admin用户
         const registerResponse = await request(app)
           .post('/api/auth/register')

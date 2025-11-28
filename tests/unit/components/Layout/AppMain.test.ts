@@ -110,6 +110,7 @@ describe('AppMain 组件 - 主内容区域测试', () => {
     // 如果组件接受 props，测试 props 变化
     // 例如：await wrapper.setProps({ someProp: 'newValue' })
     // expect(wrapper.vm.someProp).toBe('newValue')
+    expect(wrapper.exists()).toBe(true);
   });
 
   it('应该正确处理错误边界', () => {

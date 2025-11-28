@@ -271,7 +271,23 @@ export default [
     },
     rules: {
       'no-undef': 'off',
-      'no-unused-vars': ['error', { args: 'none' }]
+      'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none' }]
+    }
+  },
+  {
+    files: ['backend/**/*.js'],
+    languageOptions: {
+      parserOptions: { sourceType: 'script' },
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        __dirname: 'readonly',
+        process: 'readonly'
+      }
+    },
+    rules: {
+      'no-undef': 'off',
+      'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none' }]
     }
   }
 ];
