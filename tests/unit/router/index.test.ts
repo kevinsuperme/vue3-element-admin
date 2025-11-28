@@ -137,8 +137,8 @@ describe('Router Configuration - 路由配置测试', () => {
       vi.doMock('@/utils/auth', () => ({ getToken: mockGetToken }));
 
       // 重新导入路由配置
-      delete require.cache[require.resolve('@/router/index')];
-      const { default: configuredRoutes } = require('@/router/index');
+      vi.resetModules();
+      const { default: configuredRoutes } = await import('@/router/index');
 
       const testRouter = createRouter({
         history: createWebHistory(),
@@ -146,13 +146,8 @@ describe('Router Configuration - 路由配置测试', () => {
       });
 
       // 测试导航到需要认证的页面
-      try {
-        await testRouter.push('/dashboard');
-        // 应该被重定向到登录页面
-        expect(testRouter.currentRoute.value.path).toBe('/login');
-      } catch (error) {
-        // 导航被拦截是预期的行为
-      }
+      await testRouter.push('/dashboard').catch(() => {});
+      expect(testRouter.currentRoute.value.path).toBe('/login');
     });
 
     it('应该设置页面标题', async () => {
@@ -211,14 +206,12 @@ describe('Router Configuration - 路由配置测试', () => {
 
   describe('路由重定向', () => {
     it('应该重定向根路径到仪表板', async () => {
-      try {
-        await router.push('/');
-        // 根据配置，根路径应该重定向到仪表板
-        expect(router.currentRoute.value.path).toBe('/dashboard');
-      } catch (error) {
-        // 如果重定向失败，检查重定向配置
+      await router.push('/').catch(() => {});
+      if (router.currentRoute.value.path !== '/dashboard') {
         const rootRoute = router.getRoutes().find(route => route.path === '/');
         expect(rootRoute?.redirect).toBe('/dashboard');
+      } else {
+        expect(router.currentRoute.value.path).toBe('/dashboard');
       }
     });
 

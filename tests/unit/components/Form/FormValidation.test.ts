@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { nextTick } from 'vue';
-import { createTestWrapper, simulateInput, simulateClick, TEST_DATA } from '@/tests/utils/test-helpers';
+import { createTestWrapper, simulateInput, simulateClick } from '@/tests/utils/test-helpers';
 
 // 模拟表单组件
 const MockFormComponent = {

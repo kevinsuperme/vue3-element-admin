@@ -2,7 +2,7 @@
  * 认证API集成测试
  * @description: 测试完整的认证流程集成
  */
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import app from '../../../src/app-instance';
 
@@ -159,7 +159,7 @@ describe('Authentication API Integration Tests', () => {
       expect(response.body.message).toContain('password');
     });
 
-    '应该防止重复注册', async () => {
+    it('应该防止重复注册', async () => {
       // 首次注册
       await request(app)
         .post('/api/auth/register')
@@ -693,7 +693,7 @@ describe('Authentication API Integration Tests', () => {
         .send(tempUser)
         .expect(201);
 
-      const tempToken = createResponse.body.data.tokens.accessToken;
+      createResponse.body.data.tokens.accessToken;
 
       // 使用管理员权限删除用户
       const deleteResponse = await request(app)
@@ -873,7 +873,7 @@ describe('Authentication API Integration Tests', () => {
         'user name', // 空格
         'user@name', // 特殊字符
         '123user', // 数字开头
-        'user-123_', // 特殊字符组合
+        'user-123_' // 特殊字符组合
       ];
 
       for (const username of invalidUsernames) {

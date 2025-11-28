@@ -252,7 +252,7 @@ describe('User Store', () => {
     });
   });
 
-  describe '修改密码', () => {
+  describe('修改密码', () => {
     const mockPasswordData = {
       oldPassword: 'oldpassword',
       newPassword: 'newpassword',

@@ -65,7 +65,7 @@ function checkDependencies(projectPath) {
 function generateFrontendCoverage() {
   log.info('Generating frontend coverage report...');
 
-  const frontendPath = path.resolve(__dirname, '..');
+  const frontendPath = path.resolve(process.cwd(), '.');
   checkDependencies(frontendPath);
 
   try {
@@ -89,7 +89,7 @@ function generateFrontendCoverage() {
 function generateBackendCoverage() {
   log.info('Generating backend coverage report...');
 
-  const backendPath = path.resolve(__dirname, '../backend');
+  const backendPath = path.resolve(process.cwd(), 'backend');
   checkDependencies(backendPath);
 
   try {
@@ -259,7 +259,7 @@ async function main() {
       }
 
       // 生成合并报告目录
-      const mergedReportsPath = path.resolve(__dirname, '../coverage-reports');
+      const mergedReportsPath = path.resolve(process.cwd(), 'coverage-reports');
       if (!fs.existsSync(mergedReportsPath)) {
         fs.mkdirSync(mergedReportsPath, { recursive: true });
       }

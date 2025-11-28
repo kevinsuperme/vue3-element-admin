@@ -257,5 +257,21 @@ export default [
       'no-undef': 'off', // TypeScript handles this
       '@typescript-eslint/no-explicit-any': 'off'
     }
+  },
+  {
+    files: ['scripts/**/*.js', 'backend/scripts/**/*.js'],
+    languageOptions: {
+      parserOptions: { sourceType: 'script' },
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        __dirname: 'readonly',
+        process: 'readonly'
+      }
+    },
+    rules: {
+      'no-undef': 'off',
+      'no-unused-vars': ['error', { args: 'none' }]
+    }
   }
 ];

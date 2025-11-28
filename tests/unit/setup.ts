@@ -229,8 +229,7 @@ config.global.stubs = {
   'el-tabs': true,
   'el-tab-pane': true,
   'el-tag': true,
-  'el-progress': true,
-  'el-tree': true,
+
   'el-menu': true,
   'el-menu-item': true,
   'el-menu-item-group': true,
@@ -245,11 +244,6 @@ config.global.stubs = {
   'el-anchor-item-new': true,
   'el-anchor-link-new': true,
   'el-anchor-new': true,
-  'el-anchor-item-new': true,
-  'el-anchor-link-new': true,
-  'el-anchor-new': true,
-  'el-anchor-item-new': true,
-  'el-anchor-link-new': true,
 
   // 第三方组件存根
   'router-link': true,

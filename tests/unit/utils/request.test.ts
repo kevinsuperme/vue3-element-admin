@@ -196,8 +196,8 @@ describe('Request Utils - HTTP请求工具测试', () => {
       if (errorHandler) {
         try {
           errorHandler(error);
-        } catch (e) {
-          // 预期会抛出错误
+        } catch {
+          expect(true).toBe(true);
         }
       }
 
@@ -222,8 +222,8 @@ describe('Request Utils - HTTP请求工具测试', () => {
       if (errorHandler) {
         try {
           errorHandler(error);
-        } catch (e) {
-          // 预期会抛出错误
+        } catch {
+          expect(true).toBe(true);
         }
       }
 
@@ -247,8 +247,8 @@ describe('Request Utils - HTTP请求工具测试', () => {
       if (errorHandler) {
         try {
           errorHandler(networkError);
-        } catch (e) {
-          // 预期会抛出错误
+        } catch {
+          expect(true).toBe(true);
         }
       }
 

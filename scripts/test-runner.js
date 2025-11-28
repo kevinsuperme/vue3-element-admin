@@ -6,9 +6,10 @@
  * @date: 2025-10-30
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // 颜色输出
 const colors = {
@@ -77,7 +78,7 @@ function cleanup() {
   cleanupCommands.forEach(cmd => {
     try {
       execSync(cmd, { stdio: 'ignore' });
-    } catch (error) {
+    } catch {
       // 忽略文件不存在的错误
     }
   });
@@ -283,11 +284,12 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // 运行主函数
-if (require.main === module) {
+const thisFile = fileURLToPath(import.meta.url);
+if (process.argv[1] === thisFile) {
   main();
 }
 
-module.exports = {
+export {
   runUnitTests,
   runIntegrationTests,
   runE2ETests,

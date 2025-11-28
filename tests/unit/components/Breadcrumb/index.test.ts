@@ -2,7 +2,7 @@
  * 面包屑导航组件单元测试
  * @description: 测试面包屑导航组件的功能和交互
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Breadcrumb from '@/components/Breadcrumb/index.vue';

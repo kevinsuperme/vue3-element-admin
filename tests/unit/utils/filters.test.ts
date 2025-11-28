@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as filters from '@/utils/filters';
 
 describe('Filters Utils - 过滤器工具函数测试', () => {
   beforeEach(() => {
@@ -17,7 +18,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
 
   describe('Date Filters', () => {
     it('应该格式化日期', () => {
-      const { formatDate } = require('@/utils/filters');
+      const { formatDate } = filters;
 
       const date = new Date('2023-12-25T10:30:00');
       expect(formatDate(date)).toBe('2023-12-25');
@@ -25,7 +26,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
     });
 
     it('应该格式化相对时间', () => {
-      const { formatRelativeTime } = require('@/utils/filters');
+      const { formatRelativeTime } = filters;
 
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -36,7 +37,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
     });
 
     it('应该处理无效日期', () => {
-      const { formatDate, formatRelativeTime } = require('@/utils/filters');
+      const { formatDate, formatRelativeTime } = filters;
 
       expect(formatDate(null)).toBe('');
       expect(formatDate(undefined)).toBe('');
@@ -48,7 +49,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
 
   describe('Number Filters', () => {
     it('应该格式化数字', () => {
-      const { formatNumber } = require('@/utils/filters');
+      const { formatNumber } = filters;
 
       expect(formatNumber(1234)).toBe('1,234');
       expect(formatNumber(1234567)).toBe('1,234,567');
@@ -56,7 +57,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
     });
 
     it('应该格式化货币', () => {
-      const { formatCurrency } = require('@/utils/filters');
+      const { formatCurrency } = filters;
 
       expect(formatCurrency(1234.56)).toBe('¥1,234.56');
       expect(formatCurrency(1234.56, 'USD')).toBe('$1,234.56');
@@ -64,7 +65,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
     });
 
     it('应该格式化百分比', () => {
-      const { formatPercent } = require('@/utils/filters');
+      const { formatPercent } = filters;
 
       expect(formatPercent(0.1234)).toBe('12.34%');
       expect(formatPercent(0.1234, 1)).toBe('12.3%');
@@ -72,7 +73,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
     });
 
     it('应该格式化文件大小', () => {
-      const { formatFileSize } = require('@/utils/filters');
+      const { formatFileSize } = filters;
 
       expect(formatFileSize(1024)).toBe('1.00 KB');
       expect(formatFileSize(1024 * 1024)).toBe('1.00 MB');
@@ -83,7 +84,7 @@ describe('Filters Utils - 过滤器工具函数测试', () => {
 
   describe('String Filters', () => {
     it('应该截断文本', () => {
-      const { truncate } = require('@/utils/filters');
+      const { truncate } = filters;
 
       expect(truncate('Hello World', 5)).toBe('Hello...');
       expect(truncate('Hello World', 5, '...')).toBe('Hello...');

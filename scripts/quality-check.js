@@ -28,7 +28,7 @@ function runCommand(command, description, cwd = process.cwd()) {
     });
     log.success(`${description} - 通过`);
     return true;
-  } catch (error) {
+  } catch {
     log.error(`${description} - 失败`);
     return false;
   }
@@ -248,10 +248,6 @@ function main() {
     if (report.summary === 'ALL CHECKS PASSED') {
       log.success('所有检查通过！代码质量良好。');
       process.exit(0);
-    }请根据上述内容，完成代码质量检查工具链的开发和配置。
-
-继续完成脚本，添加错误处理、进度显示和总结功能。
-
     } else {
       log.error('部分检查失败，请修复问题后重新运行。');
       report.recommendations.forEach(rec => {
@@ -259,8 +255,8 @@ function main() {
       });
       process.exit(1);
     }
-  } catch (error) {
-    log.error(`质量检查过程中发生错误: ${error.message}`);
+  } catch {
+    log.error('质量检查过程中发生错误');
     process.exit(1);
   }
 }

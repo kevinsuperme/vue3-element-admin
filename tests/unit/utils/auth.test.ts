@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as auth from '@/utils/auth';
 
 // Mock localStorage
 const localStorageMock = {
@@ -48,8 +49,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       const token = 'test-token-123';
       localStorageMock.getItem.mockReturnValue(token);
 
-      const { getToken } = require('@/utils/auth');
-      const result = getToken();
+      const result = auth.getToken();
 
       expect(localStorageMock.getItem).toHaveBeenCalledWith('vue3-element-admin-token');
       expect(result).toBe(token);
@@ -59,8 +59,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       const token = 'new-token-456';
       localStorageMock.setItem.mockImplementation(() => {});
 
-      const { setToken } = require('@/utils/auth');
-      setToken(token);
+      auth.setToken(token);
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith('vue3-element-admin-token', token);
     });
@@ -68,8 +67,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该从localStorage移除token', () => {
       localStorageMock.removeItem.mockImplementation(() => {});
 
-      const { removeToken } = require('@/utils/auth');
-      removeToken();
+      auth.removeToken();
 
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('vue3-element-admin-token');
     });
@@ -77,8 +75,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('当token不存在时应该返回null', () => {
       localStorageMock.getItem.mockReturnValue(null);
 
-      const { getToken } = require('@/utils/auth');
-      const result = getToken();
+      const result = auth.getToken();
 
       expect(result).toBeNull();
     });
@@ -89,8 +86,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       const token = 'cookie-token-789';
       cookieMock.get.mockReturnValue(token);
 
-      const { getTokenFromCookie } = require('@/utils/auth');
-      const result = getTokenFromCookie();
+      const result = auth.getTokenFromCookie();
 
       expect(cookieMock.get).toHaveBeenCalledWith('vue3-element-admin-token');
       expect(result).toBe(token);
@@ -100,8 +96,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       const token = 'new-cookie-token';
       cookieMock.set.mockImplementation(() => {});
 
-      const { setTokenToCookie } = require('@/utils/auth');
-      setTokenToCookie(token);
+      auth.setTokenToCookie(token);
 
       expect(cookieMock.set).toHaveBeenCalledWith('vue3-element-admin-token', token, expect.any(Object));
     });
@@ -109,8 +104,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该从cookie移除token', () => {
       cookieMock.remove.mockImplementation(() => {});
 
-      const { removeTokenFromCookie } = require('@/utils/auth');
-      removeTokenFromCookie();
+      auth.removeTokenFromCookie();
 
       expect(cookieMock.remove).toHaveBeenCalledWith('vue3-element-admin-token');
     });
@@ -120,8 +114,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该判断用户是否已登录', () => {
       localStorageMock.getItem.mockReturnValue('valid-token');
 
-      const { isAuthenticated } = require('@/utils/auth');
-      const result = isAuthenticated();
+      const result = auth.isAuthenticated();
 
       expect(localStorageMock.getItem).toHaveBeenCalledWith('vue3-element-admin-token');
       expect(result).toBe(true);
@@ -130,8 +123,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('当没有token时应该返回false', () => {
       localStorageMock.getItem.mockReturnValue(null);
 
-      const { isAuthenticated } = require('@/utils/auth');
-      const result = isAuthenticated();
+      const result = auth.isAuthenticated();
 
       expect(result).toBe(false);
     });
@@ -139,8 +131,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('当token为空字符串时应该返回false', () => {
       localStorageMock.getItem.mockReturnValue('');
 
-      const { isAuthenticated } = require('@/utils/auth');
-      const result = isAuthenticated();
+      const result = auth.isAuthenticated();
 
       expect(result).toBe(false);
     });
@@ -158,8 +149,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该保存用户信息到localStorage', () => {
       localStorageMock.setItem.mockImplementation(() => {});
 
-      const { setUserInfo } = require('@/utils/auth');
-      setUserInfo(mockUserInfo);
+      auth.setUserInfo(mockUserInfo);
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'vue3-element-admin-user',
@@ -170,8 +160,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该从localStorage获取用户信息', () => {
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockUserInfo));
 
-      const { getUserInfo } = require('@/utils/auth');
-      const result = getUserInfo();
+      const result = auth.getUserInfo();
 
       expect(localStorageMock.getItem).toHaveBeenCalledWith('vue3-element-admin-user');
       expect(result).toEqual(mockUserInfo);
@@ -180,8 +169,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该移除用户信息', () => {
       localStorageMock.removeItem.mockImplementation(() => {});
 
-      const { removeUserInfo } = require('@/utils/auth');
-      removeUserInfo();
+      auth.removeUserInfo();
 
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('vue3-element-admin-user');
     });
@@ -189,8 +177,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('当用户信息不存在时应该返回null', () => {
       localStorageMock.getItem.mockReturnValue(null);
 
-      const { getUserInfo } = require('@/utils/auth');
-      const result = getUserInfo();
+      const result = auth.getUserInfo();
 
       expect(result).toBeNull();
     });
@@ -198,8 +185,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该处理无效的JSON数据', () => {
       localStorageMock.getItem.mockReturnValue('invalid-json');
 
-      const { getUserInfo } = require('@/utils/auth');
-      const result = getUserInfo();
+      const result = auth.getUserInfo();
 
       expect(result).toBeNull();
     });
@@ -216,7 +202,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该检查用户是否有指定角色', () => {
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockUserInfo));
 
-      const { hasRole } = require('@/utils/auth');
+      const { hasRole } = auth;
 
       expect(hasRole('admin')).toBe(true);
       expect(hasRole('editor')).toBe(true);
@@ -226,7 +212,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该检查用户是否有指定权限', () => {
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockUserInfo));
 
-      const { hasPermission } = require('@/utils/auth');
+      const { hasPermission } = auth;
 
       expect(hasPermission('read')).toBe(true);
       expect(hasPermission('write')).toBe(true);
@@ -237,7 +223,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('当用户信息不存在时应该返回false', () => {
       localStorageMock.getItem.mockReturnValue(null);
 
-      const { hasRole, hasPermission } = require('@/utils/auth');
+      const { hasRole, hasPermission } = auth;
 
       expect(hasRole('admin')).toBe(false);
       expect(hasPermission('read')).toBe(false);
@@ -246,7 +232,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该检查用户是否有任意指定角色', () => {
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockUserInfo));
 
-      const { hasAnyRole } = require('@/utils/auth');
+      const { hasAnyRole } = auth;
 
       expect(hasAnyRole(['admin', 'superuser'])).toBe(true);
       expect(hasAnyRole(['editor', 'moderator'])).toBe(true);
@@ -256,7 +242,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('应该检查用户是否有所有指定角色', () => {
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockUserInfo));
 
-      const { hasAllRoles } = require('@/utils/auth');
+      const { hasAllRoles } = auth;
 
       expect(hasAllRoles(['admin', 'editor'])).toBe(true);
       expect(hasAllRoles(['admin', 'user'])).toBe(false);
@@ -268,8 +254,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       const expiresAt = new Date().getTime() + 3600000; // 1小时后过期
       localStorageMock.setItem.mockImplementation(() => {});
 
-      const { setSessionExpires } = require('@/utils/auth');
-      setSessionExpires(expiresAt);
+      auth.setSessionExpires(expiresAt);
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'vue3-element-admin-expires',
@@ -281,8 +266,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       const pastTime = new Date().getTime() - 1000; // 1秒前已过期
       localStorageMock.getItem.mockReturnValue(pastTime.toString());
 
-      const { isSessionExpired } = require('@/utils/auth');
-      const result = isSessionExpired();
+      const result = auth.isSessionExpired();
 
       expect(result).toBe(true);
     });
@@ -291,8 +275,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       const futureTime = new Date().getTime() + 3600000; // 1小时后过期
       localStorageMock.getItem.mockReturnValue(futureTime.toString());
 
-      const { isSessionExpired } = require('@/utils/auth');
-      const result = isSessionExpired();
+      const result = auth.isSessionExpired();
 
       expect(result).toBe(false);
     });
@@ -300,8 +283,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
     it('当没有过期时间设置时应该返回false', () => {
       localStorageMock.getItem.mockReturnValue(null);
 
-      const { isSessionExpired } = require('@/utils/auth');
-      const result = isSessionExpired();
+      const result = auth.isSessionExpired();
 
       expect(result).toBe(false);
     });
@@ -312,8 +294,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       localStorageMock.removeItem.mockImplementation(() => {});
       cookieMock.remove.mockImplementation(() => {});
 
-      const { clearAuth } = require('@/utils/auth');
-      clearAuth();
+      auth.clearAuth();
 
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('vue3-element-admin-token');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('vue3-element-admin-user');
@@ -328,8 +309,7 @@ describe('Auth Utils - 认证工具函数测试', () => {
       localStorageMock.setItem.mockImplementation(() => {});
       localStorageMock.getItem.mockReturnValue(newToken);
 
-      const { refreshAuth } = require('@/utils/auth');
-      refreshAuth(newToken, newUserInfo);
+      auth.refreshAuth(newToken, newUserInfo);
 
       expect(localStorageMock.setItem).toHaveBeenCalledWith('vue3-element-admin-token', newToken);
       expect(localStorageMock.setItem).toHaveBeenCalledWith(

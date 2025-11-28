@@ -219,7 +219,7 @@ test.describe('用户完整业务流程', () => {
       await expect(page.locator('text=用户名')).toBeVisible();
       await expect(page.locator('text=邮箱')).toBeVisible();
       await expect(page.locator('text=角色')).toBeVisible();
-      await expect(page.locator 'text=状态')).toBeVisible();
+      await expect(page.locator('text=状态')).toBeVisible();
       await expect(page.locator('text=操作')).toBeVisible();
     });
 

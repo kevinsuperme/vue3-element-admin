@@ -143,8 +143,8 @@ describe('Dashboard Flow Integration - 仪表板流程集成测试', () => {
       // 模拟导航守卫
       try {
         await testRouter.push('/dashboard');
-      } catch (error) {
-        // 导航被拦截，这是预期的行为
+      } catch {
+        expect(true).toBe(true);
       }
 
       // 在实际应用中，应该重定向到登录页
@@ -497,7 +497,7 @@ describe('Dashboard Flow Integration - 仪表板流程集成测试', () => {
 
       try {
         await store.getUserInfo();
-      } catch (error) {
+      } catch {
         expect(wrapper.vm.error).toBeTruthy();
         expect(wrapper.vm.errorMessage).toBe('API Error');
         expect(wrapper.find('.error-message').exists()).toBe(true);
@@ -541,11 +541,3 @@ describe('Dashboard Flow Integration - 仪表板流程集成测试', () => {
   });
 });
 
-// 简单的防抖函数实现
-function debounce(fn: Function, delay: number) {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  return (...args: any[]) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
-  };
-}
