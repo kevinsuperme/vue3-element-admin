@@ -29,7 +29,7 @@ function checkNeed() {
 }
 
 // 存储错误处理定时器ID，用于清理
-const errorTimers: Set<NodeJS.Timeout> = new Set();
+const errorTimers: Set<number> = new Set();
 
 export function checkEnableLogs(app: App) {
   if (checkNeed()) {
@@ -53,10 +53,10 @@ export function checkEnableLogs(app: App) {
             } catch (storeError) {
               logger.error('Error logging failed:', storeError);
             } finally {
-              errorTimers.delete(timerId as any);
+              errorTimers.delete(timerId);
             }
           });
-          errorTimers.add(timerId as any);
+          errorTimers.add(timerId);
         } catch (error) {
           logger.error('Error in error handler setup:', error);
         }
@@ -70,7 +70,7 @@ export function checkEnableLogs(app: App) {
       return () => {
         // 清理所有待处理的错误定时器
         errorTimers.forEach(timerId => {
-          cancelAnimationFrame(timerId as number);
+          cancelAnimationFrame(timerId);
         });
         errorTimers.clear();
         originalUnmount();
@@ -82,7 +82,7 @@ export function checkEnableLogs(app: App) {
 // 导出清理函数，供测试或特殊情况使用
 export function clearErrorTimers() {
   errorTimers.forEach(timerId => {
-    cancelAnimationFrame(timerId as number);
+    cancelAnimationFrame(timerId);
   });
   errorTimers.clear();
 }

@@ -4,16 +4,14 @@ import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-// 系统信息 - 公开路由
-router.get('/system/info', SystemController.getSystemInfo);
-router.get('/system/health', SystemController.healthCheck);
-router.get('/system/routes', SystemController.getRoutesInfo);
+router.get('/info', SystemController.getSystemInfo);
+router.get('/health', SystemController.healthCheck);
+router.get('/routes', SystemController.getRoutesInfo);
 
-// 系统管理 - 需要管理员权限
-router.get('/system/env', authenticate, authorize(['admin']), SystemController.getEnvInfo);
-router.get('/system/config', authenticate, authorize(['admin']), SystemController.getAppConfig);
-router.get('/system/stats', authenticate, authorize(['admin']), SystemController.getStatistics);
-router.post('/system/restart', authenticate, authorize(['admin']), SystemController.restartApplication);
+router.get('/env', authenticate, authorize(['admin']), SystemController.getEnvInfo);
+router.get('/config', authenticate, authorize(['admin']), SystemController.getAppConfig);
+router.get('/stats', authenticate, authorize(['admin']), SystemController.getStatistics);
+router.post('/restart', authenticate, authorize(['admin']), SystemController.restartApplication);
 
 export const systemRoutes = router;
 export default router;

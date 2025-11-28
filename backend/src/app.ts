@@ -6,6 +6,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import config from './config';
 import logger, { requestLogger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -155,7 +156,30 @@ class App {
     } catch (error) {
       logger.error('MongoDB connection failed:', error);
       logger.warn('Server will continue running without database connection');
-      // 不退出进程，让服务器继续运行
+      if (config.env !== 'production') {
+        try {
+          const mongod = await MongoMemoryServer.create();
+          const uri = mongod.getUri();
+          await mongoose.connect(uri, {
+            maxPoolSize: 10,
+            minPoolSize: 2,
+            maxIdleTimeMS: 30000,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            retryWrites: true,
+            w: 'majority'
+          });
+          logger.info('MongoDB MemoryServer connected');
+          process.on('SIGINT', async () => {
+            await mongoose.connection.close();
+            await mongod.stop();
+            logger.info('MongoDB MemoryServer stopped');
+            process.exit(0);
+          });
+        } catch (e) {
+          logger.error('MongoDB MemoryServer startup failed:', e);
+        }
+      }
     }
   }
 

@@ -113,3 +113,4 @@ export interface FormRule {
 export interface FormRules {
   [key: string]: FormRule | FormRule[];
 }
+import type { VNode } from 'vue';

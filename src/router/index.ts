@@ -254,7 +254,6 @@ export const asyncRoutes:RouteRecordRaw[] = [
     ]
   },
 
-
   {
     path: '/excel',
     component: Layout,
@@ -365,34 +364,9 @@ export const asyncRoutes:RouteRecordRaw[] = [
     ]
   },
 
-  {
-    path: '/my-demo',
-    component: Layout,
-    name: 'MyDemo',
-    meta: {
-      title: '我的示例',
-      icon: 'component'
-    },
-    children: [
-      {
-        path: 'element-demo',
-        component: () => import('@/views/mydemo/ElementDemo.vue'),
-        name: 'ElementDemo',
-        meta: { title: 'Element 示例', icon: 'skill' }
-      },
-      {
-        path: 'store-demo',
-        component: () => import('@/views/mydemo/StoreDemo.vue'),
-        name: 'StoreDemo',
-        meta: { title: 'Store 示例', icon: 'lock' }
-      }
-    ]
-  },
-
   // 404 page must be placed at the end !!!
   { path: '/:pathMatch(.*)*', redirect: '/404', meta: { hidden: true }}
 ];
-
 
 const createTheRouter = ():Router => createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
